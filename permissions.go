@@ -7,14 +7,12 @@ import (
 	"strings"
 )
 
-// TODO: Find a batter place to store and manage the information for "user" and "admin" pages.
-
 var perm Permissions
 
 type Permissions struct {
-	state *UserState
+	state       *UserState
 	adminpages  []string
-	userpages  []string
+	userpages   []string
 	publicpages []string
 }
 
