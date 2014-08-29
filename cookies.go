@@ -1,4 +1,4 @@
-package userstate
+package permissions
 
 // Thanks to web.go for several of these functions
 

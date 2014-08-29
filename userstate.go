@@ -1,9 +1,10 @@
-package userstate
+package permissions
 
 import (
 	"crypto/sha256"
 	"errors"
 	"io"
+	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -30,12 +31,23 @@ type UserState struct {
 // Simple way to manage user sessions, uses a pseudorandom (not random) cookie secret
 func NewUserStateSimple() *UserState {
 	// db index 0, initialize random generator after generating the cookie secret
-	return NewUserState(0, true)
+	return NewUserState(0, true, "")
 }
 
 // Also creates a new ConnectionPool
-func NewUserState(dbindex int, randomseed bool) *UserState {
-	pool := simpleredis.NewConnectionPool()
+func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState {
+	if err := simpleredis.TestConnectionSimple(); err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	var pool *simpleredis.ConnectionPool
+
+	if redisHostPort == "" {
+		pool = simpleredis.NewConnectionPool()
+	} else {
+		pool = simpleredis.NewConnectionPoolHost(redisHostPort)
+	}
+
 	state := new(UserState)
 
 	state.users = simpleredis.NewHashMap(pool, "users")

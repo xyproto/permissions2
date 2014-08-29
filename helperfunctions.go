@@ -1,4 +1,4 @@
-package userstate
+package permissions
 
 import (
 	"errors"
