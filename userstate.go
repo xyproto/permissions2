@@ -28,7 +28,7 @@ type UserState struct {
 }
 
 // Simple way to manage user sessions, uses a pseudorandom (not random) cookie secret
-func New() *UserState {
+func NewUserStateSimple() *UserState {
 	// db index 0, initialize random generator after generating the cookie secret
 	return NewUserState(0, true)
 }

@@ -11,7 +11,8 @@ import (
 func main() {
 	n := negroni.Classic()
 
-	u := userstate.New()
+	permissions := userstate.New()
+	u := permissions.UserState()
 
 	mux := http.NewServeMux()
 
@@ -67,10 +68,7 @@ func main() {
 		fmt.Fprintf(w, "super secret information that only administrators must see!")
 	})
 
-	u.OnlyUsers("/user")
-	u.OnlyAdmin("/admin")
-
-	n.Use(u)
+	n.Use(permissions)
 
 	n.UseHandler(mux)
 
