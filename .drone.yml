@@ -1,6 +1,0 @@
-image: go1.2
-script:
-        - go build
-        - go test -v
-services:
-        - redis
