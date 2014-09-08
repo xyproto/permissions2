@@ -18,10 +18,10 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "Has user bob: %v\nLogged in: %v\n", userstate.HasUser("bob"), userstate.IsLoggedIn("bob"))
+		fmt.Fprintf(w, "Has user bob: %v\nLogged in on server: %v\n", userstate.HasUser("bob"), userstate.IsLoggedIn("bob"))
 		fmt.Fprintf(w, "Is confirmed: %v\n", userstate.IsConfirmed("bob"))
-		fmt.Fprintf(w, "Current user is logged in and has user rights: %v\n", userstate.UserRights(req))
-		fmt.Fprintf(w, "Current user is logged in and has admin rights: %v\n", userstate.AdminRights(req))
+		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(req))
+		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(req))
 		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.GetUsername(req))
 		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /makeadmin and /admin")
 	})
