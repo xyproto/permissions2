@@ -69,7 +69,7 @@ func main() {
 	})
 
 	perm.SetDenyFunction(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "<b>Permission denied!</b>")
+		fmt.Fprintf(w, "Permission denied!")
 	})
 
 	n.Use(perm)
