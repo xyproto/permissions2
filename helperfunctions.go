@@ -25,13 +25,6 @@ func ColonSplit(s string) (string, string) {
 	return s, ""
 }
 
-func Min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func TableCell(b bool) string {
 	if b {
 		return "<td class=\"yes\">yes</td>"
