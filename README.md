@@ -6,7 +6,8 @@ Permissions
 [![GoDoc](https://godoc.org/github.com/xyproto/permissions?status.svg)](http://godoc.org/github.com/xyproto/permissions)
 
 
-Middleware for Negroni for keeping track of users.
+Middleware for Negroni, for keeping track of users and permissions.
+
 
 Online API Documentation
 ------------------------
@@ -21,6 +22,7 @@ Features and limitations
 * Suitable for running a local Redis server and managing public pages, pages that are available for logged in users and pages that are available for logged in administrators.
 * Supports registration and confirmation via generated confirmation codes.
 * Tries to keep things simple.
+* Only supports "public", "user" and "admin" permissions out of the box, but offers functionality for implementing more fine grained permissions, if so desired.
 
 
 Example for [Negroni](https://github.com/codegangsta/negroni)
@@ -104,7 +106,7 @@ func main() {
 
 	n.UseHandler(mux)
 
-	n.Run(":4242")
+	n.Run(":3000")
 }
 ~~~
 
