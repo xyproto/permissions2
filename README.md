@@ -1,7 +1,7 @@
 #Permissions [![Build Status](https://travis-ci.org/xyproto/permissions.svg?branch=master)](https://travis-ci.org/xyproto/permissions) [![GoDoc](https://godoc.org/github.com/xyproto/permissions?status.svg)](http://godoc.org/github.com/xyproto/permissions)
 <!--[![Build Status](https://drone.io/github.com/xyproto/permissions/status.png)](https://drone.io/github.com/xyproto/permissions/latest)    build succeeds, but github says build fails. Weirdness. -->
 
-Middleware for Negroni, for keeping track of users and permissions.
+Middleware for Negroni, for keeping track of users, login states and permissions.
 
 
 Online API Documentation
