@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-var perm Permissions
-
 type Permissions struct {
 	state              *UserState
 	adminPathPrefixes  []string
@@ -19,10 +17,19 @@ type Permissions struct {
 	denied             http.HandlerFunc
 }
 
+// Initialize a Permissions struct with all the default settings.
+// This will also connect to the redis host at localhost:6379.
 func New() *Permissions {
 	return NewPermissions(NewUserStateSimple())
 }
 
+// Initialize a Permissions struct with Redis DB index and host:port
+func NewWithRedisConf(dbindex int, hostPort string) *Permissions {
+	return NewPermissions(NewUserState(dbindex, true, hostPort))
+}
+
+// Initialize a Permissions struct with the given UserState and
+// a few default paths for admin/user/public path prefixes.
 func NewPermissions(state *UserState) *Permissions {
 	// default permissions
 	return &Permissions{state,
@@ -33,10 +40,12 @@ func NewPermissions(state *UserState) *Permissions {
 		PermissionDenied}
 }
 
+// Specify the http.HandlerFunc for when the permissions are denied
 func (perm *Permissions) SetDenyFunction(f http.HandlerFunc) {
 	perm.denied = f
 }
 
+// Retrieve the UserState struct
 func (perm *Permissions) UserState() *UserState {
 	return perm.state
 }
@@ -71,6 +80,7 @@ func (perm *Permissions) SetPublicPath(pathPrefixes []string) {
 	perm.publicPathPrefixes = pathPrefixes
 }
 
+// The default "permission denied" http handler
 func PermissionDenied(rw http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(rw, "Permission denied.")
 }
