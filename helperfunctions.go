@@ -69,7 +69,7 @@ func CleanUserInput(val string) string {
 	return strings.Replace(val, "<", "&lt;", -1)
 }
 
-func Check(username, password, email string) error {
+func Check(username, password string) error {
 NEXT:
 	for _, letter := range username {
 		for _, allowedLetter := range USERNAME_ALLOWED_LETTERS {
