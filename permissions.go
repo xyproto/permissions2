@@ -17,6 +17,11 @@ type Permissions struct {
 	denied             http.HandlerFunc
 }
 
+const (
+	// Version number. Stable API within major version numbers.
+	Version = 1.0
+)
+
 // Initialize a Permissions struct with all the default settings.
 // This will also connect to the redis host at localhost:6379.
 func New() *Permissions {

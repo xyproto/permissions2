@@ -108,6 +108,7 @@ func main() {
 General information
 ---------------------------
 
+* Version: 1.0
 * License: MIT
 * Alexander Rødseth
 

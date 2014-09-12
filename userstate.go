@@ -36,7 +36,7 @@ func NewUserStateSimple() *UserState {
 
 // Also creates a new ConnectionPool
 func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState {
-	if err := simpleredis.TestConnectionSimple(); err != nil {
+	if err := simpleredis.TestConnectionHost(redisHostPort); err != nil {
 		log.Fatalln(err.Error())
 	}
 
