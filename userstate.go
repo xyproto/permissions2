@@ -10,11 +10,13 @@ import (
 	"time"
 
 	"github.com/xyproto/simpleredis"
+	"github.com/xyproto/webhandle"
 )
 
 const (
-	MINIMUM_CONFIRMATION_CODE_LENGTH = 20
-	SALTWORD                         = "hi" // used together with username and password when hashing
+	minConfirmationCodeLength = 20   // minimum length of the confirmation code
+	saltword                  = "hi" // used together with username and password when hashing
+	defaultRedisServer        = ":6379"
 )
 
 type UserState struct {
@@ -31,22 +33,26 @@ type UserState struct {
 // Simple way to manage user sessions, uses a pseudorandom (not random) cookie secret
 func NewUserStateSimple() *UserState {
 	// db index 0, initialize random generator after generating the cookie secret
-	return NewUserState(0, true, "")
+	return NewUserState(0, true, defaultRedisServer)
 }
 
-// Also creates a new ConnectionPool
+// Also creates a new ConnectionPool.
+// randomseed is normally true, for seeding the random number generator after generating the cookie secret
+// redisHostPort can be blank, for using the local Redis instance
 func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState {
+	var pool *simpleredis.ConnectionPool
+
+	// Connnect to the default redis server if redisHostPort is empty
+	if redisHostPort == "" {
+		redisHostPort = defaultRedisServer
+	}
+
+	// Test connection
 	if err := simpleredis.TestConnectionHost(redisHostPort); err != nil {
 		log.Fatalln(err.Error())
 	}
-
-	var pool *simpleredis.ConnectionPool
-
-	if redisHostPort == "" {
-		pool = simpleredis.NewConnectionPool()
-	} else {
-		pool = simpleredis.NewConnectionPoolHost(redisHostPort)
-	}
+	// Aquire connection pool
+	pool = simpleredis.NewConnectionPoolHost(redisHostPort)
 
 	state := new(UserState)
 
@@ -66,7 +72,7 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 	// For the secure cookies
 	// This must happen before the random seeding, or
 	// else people will have to log in again after every server restart
-	state.cookieSecret = RandomCookieFriendlyString(30)
+	state.cookieSecret = webhandle.RandomCookieFriendlyString(30)
 
 	// Seed the random number generator
 	if randomseed {
@@ -117,7 +123,7 @@ func (state *UserState) GetBooleanField(username, fieldname string) bool {
 	if err != nil {
 		return false
 	}
-	return TruthValue(chatting)
+	return webhandle.TruthValue(chatting)
 }
 
 func (state *UserState) SetBooleanField(username, fieldname string, val bool) {
@@ -142,7 +148,7 @@ func (state *UserState) IsLoggedIn(username string) bool {
 		// Returns "no" if the status can not be retrieved
 		return false
 	}
-	return TruthValue(status)
+	return webhandle.TruthValue(status)
 }
 
 // Checks if the current user is logged in as Administrator right now
@@ -163,7 +169,7 @@ func (state *UserState) IsAdmin(username string) bool {
 	if err != nil {
 		return false
 	}
-	return TruthValue(status)
+	return webhandle.TruthValue(status)
 }
 
 // Gets the username that is stored in a cookie in the browser, if available
@@ -397,12 +403,12 @@ func (state *UserState) ConfirmUserByConfirmationCode(confirmationcode string) e
 
 func (state *UserState) GenerateUniqueConfirmationCode() (string, error) {
 	// The confirmation code must be a minimum of 8 letters long
-	length := MINIMUM_CONFIRMATION_CODE_LENGTH
-	confirmationCode := RandomHumanFriendlyString(length)
+	length := minConfirmationCodeLength
+	confirmationCode := webhandle.RandomHumanFriendlyString(length)
 	for state.AlreadyHasConfirmationCode(confirmationCode) {
 		// Increase the length of the confirmationCode random string every time there is a collision
 		length++
-		confirmationCode = RandomHumanFriendlyString(length)
+		confirmationCode = webhandle.RandomHumanFriendlyString(length)
 		if length > 100 {
 			// This should never happen
 			return confirmationCode, errors.New("ERROR: Too many generated confirmation codes are not unique, something is wrong")

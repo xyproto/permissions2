@@ -3,7 +3,7 @@ package permissions
 import "testing"
 
 func TestPerm(t *testing.T) {
-	userstate := New().UserState()
+	userstate := NewUserStateSimple()
 
 	userstate.AddUser("bob", "hunter1", "bob@zombo.com")
 
