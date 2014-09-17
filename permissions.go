@@ -38,9 +38,10 @@ func NewWithRedisConf(dbindex int, hostPort string) *Permissions {
 func NewPermissions(state *UserState) *Permissions {
 	// default permissions
 	return &Permissions{state,
-		[]string{"/admin"},                                                            // admin path prefixes
-		[]string{"/repo", "/data"},                                                    // user path prefixes
-		[]string{"/", "/login", "/register", "/favicon.ico", "/style", "/img", "/js"}, // public
+		[]string{"/admin"},         // admin path prefixes
+		[]string{"/repo", "/data"}, // user path prefixes
+		[]string{"/", "/login", "/register", "/favicon.ico", "/style", "/img", "/js",
+			"/favicon.ico", "/robots.txt", "/sitemap_index.xml"}, // public
 		true,
 		PermissionDenied}
 }
