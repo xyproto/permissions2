@@ -79,7 +79,8 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 		rand.Seed(time.Now().UnixNano())
 	}
 
-	state.cookieTime = 3600 * 24 // Login cookies should last for 24 hours
+	// Cookies lasts for 24 hours by default. Specified in seconds.
+	state.cookieTime = defaultCookieTime
 
 	return state
 }
@@ -306,10 +307,17 @@ func (state *UserState) GetUsername(req *http.Request) string {
 	return username
 }
 
-// Get how long a login cookie should last
+// Get how long a login cookie should last, in seconds
 func (state *UserState) GetCookieTimeout(username string) int64 {
 	return state.cookieTime
 }
+
+// Set how long a login cookie should last, in seconds
+func (state *UserState) SetCookieTimeout(cookieTime int64) {
+	state.cookieTime = cookieTime
+}
+
+// Set how long a loogin cookie should last
 
 // New password hashing function, with the username as part of the salt
 func (state *UserState) HashPassword(username, password string) string {
