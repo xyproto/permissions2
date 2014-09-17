@@ -45,9 +45,9 @@ func main() {
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "Has user bob: %v\nLogged in on server: %v\n", userstate.HasUser("bob"), userstate.IsLoggedIn("bob"))
 		fmt.Fprintf(w, "Is confirmed: %v\n", userstate.IsConfirmed("bob"))
+		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.GetUsername(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(req))
-		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.GetUsername(req))
 		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /makeadmin and /admin")
 	})
 
@@ -87,8 +87,7 @@ func main() {
 
 	mux.HandleFunc("/admin", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "super secret information that only logged in administrators must see!\n\n")
-		usernames, err := userstate.GetAllUsernames()
-		if err == nil {
+		if usernames, err := userstate.GetAllUsernames(); err == nil {
 			fmt.Fprintf(w, "list of all users: "+strings.Join(usernames, ", "))
 		}
 	})
