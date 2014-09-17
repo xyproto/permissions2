@@ -105,8 +105,15 @@ func main() {
 }
 ~~~
 
+Default permissions
+-------------------
+
+* This path prefix has admin rights by default: /admin
+* These path prefixes has user rights by default: /repo, /data
+* These path prefixes are public by default: /, /login, /register, /style, /img, /js, /favicon.ico, /robots.txt, /sitemap_index.xml
+
 General information
----------------------------
+-------------------
 
 * Version: 1.0
 * License: MIT
