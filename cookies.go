@@ -16,6 +16,10 @@ import (
 	"time"
 )
 
+const (
+	defaultCookieTime = 3600 * 24 // Login cookies should last for 24 hours, by default
+)
+
 func GetSecureCookie(req *http.Request, name string, cookieSecret string) (string, bool) {
 	for _, cookie := range req.Cookies() {
 		if cookie.Name != name {
