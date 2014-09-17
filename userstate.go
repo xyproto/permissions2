@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/xyproto/simpleredis"
-	"github.com/xyproto/webhandle"
 )
 
 const (
@@ -72,7 +71,7 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 	// For the secure cookies
 	// This must happen before the random seeding, or
 	// else people will have to log in again after every server restart
-	state.cookieSecret = webhandle.RandomCookieFriendlyString(30)
+	state.cookieSecret = RandomCookieFriendlyString(30)
 
 	// Seed the random number generator
 	if randomseed {
@@ -115,18 +114,23 @@ func (state *UserState) HasUser(username string) bool {
 	return val
 }
 
+// Return the boolean value for a given username and fieldname.
+// If the user or field is missing, false will be returned.
+// Useful for states where it makes sense that the returned value is not true
+// unless everything is in order.
 func (state *UserState) GetBooleanField(username, fieldname string) bool {
 	hasUser := state.HasUser(username)
 	if !hasUser {
 		return false
 	}
-	chatting, err := state.users.Get(username, fieldname)
+	value, err := state.users.Get(username, fieldname)
 	if err != nil {
 		return false
 	}
-	return webhandle.TruthValue(chatting)
+	return value == "true"
 }
 
+// Attempt to store a boolean value for the given username and fieldname.
 func (state *UserState) SetBooleanField(username, fieldname string, val bool) {
 	strval := "false"
 	if val {
@@ -149,7 +153,7 @@ func (state *UserState) IsLoggedIn(username string) bool {
 		// Returns "no" if the status can not be retrieved
 		return false
 	}
-	return webhandle.TruthValue(status)
+	return status == "true"
 }
 
 // Checks if the current user is logged in as Administrator right now
@@ -170,7 +174,7 @@ func (state *UserState) IsAdmin(username string) bool {
 	if err != nil {
 		return false
 	}
-	return webhandle.TruthValue(status)
+	return status == "true"
 }
 
 // Gets the username that is stored in a cookie in the browser, if available
@@ -412,15 +416,34 @@ func (state *UserState) ConfirmUserByConfirmationCode(confirmationcode string) e
 func (state *UserState) GenerateUniqueConfirmationCode() (string, error) {
 	// The confirmation code must be a minimum of 8 letters long
 	length := minConfirmationCodeLength
-	confirmationCode := webhandle.RandomHumanFriendlyString(length)
+	confirmationCode := RandomHumanFriendlyString(length)
 	for state.AlreadyHasConfirmationCode(confirmationCode) {
 		// Increase the length of the confirmationCode random string every time there is a collision
 		length++
-		confirmationCode = webhandle.RandomHumanFriendlyString(length)
+		confirmationCode = RandomHumanFriendlyString(length)
 		if length > 100 {
 			// This should never happen
 			return confirmationCode, errors.New("ERROR: Too many generated confirmation codes are not unique, something is wrong")
 		}
 	}
 	return confirmationCode, nil
+}
+
+// Check that the given username and password are different.
+// Also check if the chosen letters are a-å, A-Å, 0-9 and/or _.
+func ValidUsernamePassword(username, password string) error {
+	const allowed_letters = "abcdefghijklmnopqrstuvwxyzæøåABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ_0123456789"
+NEXT:
+	for _, letter := range username {
+		for _, allowedLetter := range allowed_letters {
+			if letter == allowedLetter {
+				continue NEXT // check the next letter in the username
+			}
+		}
+		return errors.New("Only a-å, A-Å, 0-9 and _ are allowed in usernames.")
+	}
+	if username == password {
+		return errors.New("Username and password must be different, try another password.")
+	}
+	return nil
 }
