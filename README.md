@@ -117,5 +117,5 @@ General information
 
 * Version: 1.0
 * License: MIT
-* Alexander Rødseth
+* Alexander F Rødseth
 
