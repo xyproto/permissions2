@@ -92,11 +92,9 @@ func PermissionDenied(rw http.ResponseWriter, req *http.Request) {
 }
 
 // Check if a given request should be rejected.
-// Also calls the permission denied function, if needed.
-// If that is the case, the next middleware handler should not be called.
 func (perm *Permissions) Rejected(rw http.ResponseWriter, req *http.Request) bool {
-	path := req.URL.Path // the path of the url that the user wish to visit
 	reject := false
+	path := req.URL.Path // the path of the url that the user wish to visit
 
 	// If it's not "/" and set to be public regardless of permissions
 	if !(perm.rootIsPublic && path == "/") {
@@ -139,19 +137,15 @@ func (perm *Permissions) Rejected(rw http.ResponseWriter, req *http.Request) boo
 
 	}
 
-	if reject {
-		// Permission denied function
-		perm.denied(rw, req)
-	}
-
 	return reject
-
 }
 
 // Negroni middleware handler
 func (perm *Permissions) ServeHTTP(rw http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
 	// Check if the user has the right admin/user rights
 	if perm.Rejected(rw, req) {
+		// Permission denied function
+		perm.denied(rw, req)
 		// Reject the request by not calling the next handler below
 		return
 	}
