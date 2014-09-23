@@ -13,9 +13,11 @@ import (
 )
 
 const (
-	minConfirmationCodeLength = 20   // minimum length of the confirmation code
-	saltword                  = "hi" // used together with username and password when hashing
-	defaultRedisServer        = ":6379"
+	defaultRedisServer = ":6379"
+)
+
+var (
+	minConfirmationCodeLength = 20 // minimum length of the confirmation code
 )
 
 type UserState struct {
@@ -413,8 +415,12 @@ func (state *UserState) ConfirmUserByConfirmationCode(confirmationcode string) e
 	return nil
 }
 
+// Set the minimum length of the user confirmation code. The default is 20.
+func (state *UserState) SetMinimumConfirmationCodeLength(length int) {
+	minConfirmationCodeLength = length
+}
+
 func (state *UserState) GenerateUniqueConfirmationCode() (string, error) {
-	// The confirmation code must be a minimum of 8 letters long
 	length := minConfirmationCodeLength
 	confirmationCode := RandomHumanFriendlyString(length)
 	for state.AlreadyHasConfirmationCode(confirmationCode) {
