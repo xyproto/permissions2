@@ -1,6 +1,6 @@
 package permissions
 
-// The Negroni middleware handler
+// Middleware handler for handling requests and permissions
 
 import (
 	"fmt"
@@ -91,9 +91,10 @@ func PermissionDenied(rw http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(rw, "Permission denied.")
 }
 
-// Check if the user has the right admin/user rights
-func (perm *Permissions) ServeHTTP(rw http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
-
+// Check if a given request should be rejected.
+// Also calls the permission denied function, if needed.
+// If that is the case, the next middleware handler should not be called.
+func (perm *Permissions) Rejected(rw http.ResponseWriter, req *http.Request) bool {
 	path := req.URL.Path // the path of the url that the user wish to visit
 	reject := false
 
@@ -141,7 +142,16 @@ func (perm *Permissions) ServeHTTP(rw http.ResponseWriter, req *http.Request, ne
 	if reject {
 		// Permission denied function
 		perm.denied(rw, req)
+	}
 
+	return reject
+
+}
+
+// Negroni middleware handler
+func (perm *Permissions) ServeHTTP(rw http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
+	// Check if the user has the right admin/user rights
+	if perm.Rejected(rw, req) {
 		// Reject the request by not calling the next handler below
 		return
 	}
