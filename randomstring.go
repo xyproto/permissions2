@@ -42,4 +42,3 @@ func RandomCookieFriendlyString(length int) string {
 	}
 	return string(b)
 }
-
