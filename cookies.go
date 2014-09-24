@@ -93,10 +93,10 @@ func getCookieSig(key string, val []byte, timestamp string) string {
 }
 
 // Used for setting cookies
-func SetHeader(rw http.ResponseWriter, hdr, val string, unique bool) {
+func SetHeader(w http.ResponseWriter, hdr, val string, unique bool) {
 	if unique {
-		rw.Header().Set(hdr, val)
+		w.Header().Set(hdr, val)
 	} else {
-		rw.Header().Add(hdr, val)
+		w.Header().Add(hdr, val)
 	}
 }
