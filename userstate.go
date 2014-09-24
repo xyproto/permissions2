@@ -31,7 +31,7 @@ type UserState struct {
 	cookieTime   int64                       // How long a cookie should last, in seconds
 }
 
-// Simple way to manage user sessions, uses a pseudorandom (not random) cookie secret
+// Simple way to manage user sessions, uses a pseudorandom cookie secret
 func NewUserStateSimple() *UserState {
 	// db index 0, initialize random generator after generating the cookie secret
 	return NewUserState(0, true, defaultRedisServer)
@@ -86,19 +86,22 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 	return state
 }
 
+// Get the Redis database index
 func (state *UserState) GetDatabaseIndex() int {
 	return state.dbindex
 }
 
+// Get the Redis connection pool
 func (state *UserState) GetPool() *simpleredis.ConnectionPool {
 	return state.pool
 }
 
+// Close the Redis connection pool
 func (state *UserState) Close() {
 	state.pool.Close()
 }
 
-// Checks if the current user is logged in as a user right now
+// Check if the current user is logged in as a user right now
 func (state *UserState) UserRights(req *http.Request) bool {
 	username, err := state.GetUsernameCookie(req)
 	if err != nil {
@@ -107,6 +110,7 @@ func (state *UserState) UserRights(req *http.Request) bool {
 	return state.IsLoggedIn(username)
 }
 
+// Check if the given username exists
 func (state *UserState) HasUser(username string) bool {
 	val, err := state.usernames.Has(username)
 	if err != nil {
@@ -141,6 +145,7 @@ func (state *UserState) SetBooleanField(username, fieldname string, val bool) {
 	state.users.Set(username, fieldname, strval)
 }
 
+// Check if the given username is confirmed
 func (state *UserState) IsConfirmed(username string) bool {
 	return state.GetBooleanField(username, "confirmed")
 }
@@ -158,7 +163,7 @@ func (state *UserState) IsLoggedIn(username string) bool {
 	return status == "true"
 }
 
-// Checks if the current user is logged in as Administrator right now
+// Check if the current user is logged in as Administrator right now
 func (state *UserState) AdminRights(req *http.Request) bool {
 	username, err := state.GetUsernameCookie(req)
 	if err != nil {
@@ -167,7 +172,7 @@ func (state *UserState) AdminRights(req *http.Request) bool {
 	return state.IsLoggedIn(username) && state.IsAdmin(username)
 }
 
-// Checks if the given username is an administrator
+// Check if the given username is an administrator
 func (state *UserState) IsAdmin(username string) bool {
 	if !state.HasUser(username) {
 		return false
@@ -179,7 +184,7 @@ func (state *UserState) IsAdmin(username string) bool {
 	return status == "true"
 }
 
-// Gets the username that is stored in a cookie in the browser, if available
+// Retrieve the username that is stored in a cookie in the browser, if available
 func (state *UserState) GetUsernameCookie(req *http.Request) (string, error) {
 	username, ok := GetSecureCookie(req, "user", state.cookieSecret)
 	if ok && (username != "") {
@@ -188,6 +193,8 @@ func (state *UserState) GetUsernameCookie(req *http.Request) (string, error) {
 	return "", errors.New("Could not retrieve the username from browser cookie")
 }
 
+// Store the given username in a cookie in the browser, if possible.
+// The user must exist.
 func (state *UserState) SetUsernameCookie(w http.ResponseWriter, username string) error {
 	if username == "" {
 		return errors.New("Can't set cookie for empty username")
@@ -201,18 +208,22 @@ func (state *UserState) SetUsernameCookie(w http.ResponseWriter, username string
 	return nil
 }
 
+// Get a list of all usernames
 func (state *UserState) GetAllUsernames() ([]string, error) {
 	return state.usernames.GetAll()
 }
 
+// Get the email for the given username
 func (state *UserState) GetEmail(username string) (string, error) {
 	return state.users.Get(username, "email")
 }
 
+// Get the password hash for the given username
 func (state *UserState) GetPasswordHash(username string) (string, error) {
 	return state.users.Get(username, "password")
 }
 
+// Get all registered users that are not yet confirmed
 func (state *UserState) GetAllUnconfirmedUsernames() ([]string, error) {
 	return state.unconfirmed.GetAll()
 }
@@ -222,17 +233,18 @@ func (state *UserState) GetConfirmationCode(username string) (string, error) {
 	return state.users.Get(username, "confirmationCode")
 }
 
+// Get the users HashMap
 func (state *UserState) GetUsers() *simpleredis.HashMap {
 	return state.users
 }
 
-// Add a user that has registered but not confirmed
+// Add a user that is registered but not confirmed
 func (state *UserState) AddUnconfirmed(username, confirmationCode string) {
 	state.unconfirmed.Add(username)
 	state.users.Set(username, "confirmationCode", confirmationCode)
 }
 
-// Remove a user that has registered but not confirmed
+// Remove a user that is registered but not confirmed
 func (state *UserState) RemoveUnconfirmed(username string) {
 	state.unconfirmed.Del(username)
 	state.users.DelKey(username, "confirmationCode")
@@ -304,7 +316,7 @@ func (state *UserState) Logout(username string) {
 	state.SetLoggedOut(username)
 }
 
-// Convenience function that will return a username or an empty string
+// Convenience function that will return a username (from the browser cookie) or an empty string
 func (state *UserState) GetUsername(req *http.Request) string {
 	username, err := state.GetUsernameCookie(req)
 	if err != nil {
@@ -322,8 +334,6 @@ func (state *UserState) GetCookieTimeout(username string) int64 {
 func (state *UserState) SetCookieTimeout(cookieTime int64) {
 	state.cookieTime = cookieTime
 }
-
-// Set how long a loogin cookie should last
 
 // New password hashing function, with the username as part of the salt
 func (state *UserState) HashPassword(username, password string) string {
@@ -363,6 +373,7 @@ func (state *UserState) AlreadyHasConfirmationCode(confirmationCode string) bool
 	return false
 }
 
+// Given a unique confirmation code, find the corresponding username
 func (state *UserState) FindUserByConfirmationCode(confirmationcode string) (string, error) {
 	unconfirmedUsernames, err := state.GetAllUnconfirmedUsernames()
 	if err != nil {
@@ -420,24 +431,27 @@ func (state *UserState) SetMinimumConfirmationCodeLength(length int) {
 	minConfirmationCodeLength = length
 }
 
+// Generate a unique confirmation code that can be used for confirming users
 func (state *UserState) GenerateUniqueConfirmationCode() (string, error) {
+	const maxConfirmationCodeLength = 100 // when are the generated confirmation codes unreasonably long
 	length := minConfirmationCodeLength
 	confirmationCode := RandomHumanFriendlyString(length)
 	for state.AlreadyHasConfirmationCode(confirmationCode) {
 		// Increase the length of the confirmationCode random string every time there is a collision
 		length++
 		confirmationCode = RandomHumanFriendlyString(length)
-		if length > 100 {
+		if length > maxConfirmationCodeLength {
 			// This should never happen
-			return confirmationCode, errors.New("ERROR: Too many generated confirmation codes are not unique, something is wrong")
+			return confirmationCode, errors.New("Too many generated confirmation codes are not unique!")
 		}
 	}
 	return confirmationCode, nil
 }
 
 // Check that the given username and password are different.
-// Also check if the chosen letters are a-å, A-Å, 0-9 and/or _.
+// Also check if the chosen username only contains letters, numbers and/or underscore.
 func ValidUsernamePassword(username, password string) error {
+	// TODO: Use a more international selection of letters
 	const allowed_letters = "abcdefghijklmnopqrstuvwxyzæøåABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ_0123456789"
 NEXT:
 	for _, letter := range username {
@@ -446,7 +460,7 @@ NEXT:
 				continue NEXT // check the next letter in the username
 			}
 		}
-		return errors.New("Only a-å, A-Å, 0-9 and _ are allowed in usernames.")
+		return errors.New("Only letters, numbers and underscore are allowed in usernames.")
 	}
 	if username == password {
 		return errors.New("Username and password must be different, try another password.")
