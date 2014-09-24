@@ -11,11 +11,13 @@ import (
 
 func main() {
 	n := negroni.Classic()
-
-	perm := permissions.New()
-	userstate := perm.UserState()
-
 	mux := http.NewServeMux()
+
+	// New permissions middleware struct
+	perm := permissions.New()
+
+	// Retrieve the userstate, used in the handlers below
+	userstate := perm.UserState()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "Has user bob: %v\n", userstate.HasUser("bob"))
@@ -68,12 +70,15 @@ func main() {
 		}
 	})
 
-	perm.SetDenyFunction(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Permission denied!")
+	// Custom handler for when permissions are denied
+	perm.SetDenyFunction(func(w http.ResponseWriter, req *http.Request) {
+		http.Error(w, "Permission denied!", http.StatusForbidden)
 	})
 
+	// Enable the permissions middleware
 	n.Use(perm)
 
+	// Use mux for routing, this goes last
 	n.UseHandler(mux)
 
 	n.Run(":3000")
