@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/codegangsta/negroni"
+	"github.com/go-martini/martini"
 	"github.com/xyproto/permissions"
 )
 
 func main() {
-	n := negroni.Classic()
-	mux := http.NewServeMux()
+	m := martini.Classic()
 
 	// New permissions middleware
 	perm := permissions.New()
@@ -19,7 +18,7 @@ func main() {
 	// Get the userstate, used in the handlers below
 	userstate := perm.UserState()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "Has user bob: %v\n", userstate.HasUser("bob"))
 		fmt.Fprintf(w, "Logged in on server: %v\n", userstate.IsLoggedIn("bob"))
 		fmt.Fprintf(w, "Is confirmed: %v\n", userstate.IsConfirmed("bob"))
@@ -29,58 +28,64 @@ func main() {
 		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /makeadmin and /admin")
 	})
 
-	mux.HandleFunc("/register", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/register", func(w http.ResponseWriter, req *http.Request) {
 		userstate.AddUser("bob", "hunter1", "bob@zombo.com")
 		fmt.Fprintf(w, "User bob was created: %v\n", userstate.HasUser("bob"))
 	})
 
-	mux.HandleFunc("/confirm", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/confirm", func(w http.ResponseWriter, req *http.Request) {
 		userstate.MarkConfirmed("bob")
 		fmt.Fprintf(w, "User bob was confirmed: %v\n", userstate.IsConfirmed("bob"))
 	})
 
-	mux.HandleFunc("/remove", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/remove", func(w http.ResponseWriter, req *http.Request) {
 		userstate.RemoveUser("bob")
 		fmt.Fprintf(w, "User bob was removed: %v\n", !userstate.HasUser("bob"))
 	})
 
-	mux.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/login", func(w http.ResponseWriter, req *http.Request) {
 		userstate.Login(w, "bob")
 		fmt.Fprintf(w, "bob is now logged in: %v\n", userstate.IsLoggedIn("bob"))
 	})
 
-	mux.HandleFunc("/logout", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/logout", func(w http.ResponseWriter, req *http.Request) {
 		userstate.Logout("bob")
 		fmt.Fprintf(w, "bob is now logged out: %v\n", !userstate.IsLoggedIn("bob"))
 	})
 
-	mux.HandleFunc("/makeadmin", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/makeadmin", func(w http.ResponseWriter, req *http.Request) {
 		userstate.SetAdminStatus("bob")
 		fmt.Fprintf(w, "bob is now administrator: %v\n", userstate.IsAdmin("bob"))
 	})
 
-	mux.HandleFunc("/data", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/data", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "user page that only logged in users must see!")
 	})
 
-	mux.HandleFunc("/admin", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/admin", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "super secret information that only logged in administrators must see!\n\n")
 		if usernames, err := userstate.GetAllUsernames(); err == nil {
 			fmt.Fprintf(w, "list of all users: "+strings.Join(usernames, ", "))
 		}
 	})
 
-	// Custom handler for when permissions are denied
-	perm.SetDenyFunction(func(w http.ResponseWriter, req *http.Request) {
-		http.Error(w, "Permission denied!", http.StatusForbidden)
-	})
+	// Set up a middleware handler for Martini, with a custom "permission denied" message.
+	// Use the xyproto/fizz middleware for a simpler solution.
+	permissionHandler := func(w http.ResponseWriter, req *http.Request, c martini.Context) {
+		// Check if the user has the right admin/user rights
+		if perm.Rejected(w, req) {
+			// Deny the request
+			http.Error(w, "Permission denied!", http.StatusForbidden)
+			// Reject the request by not calling the next handler below
+			return
+		}
+		// Call the next middleware handler
+		c.Next()
+	}
 
 	// Enable the permissions middleware
-	n.Use(perm)
-
-	// Use mux for routing, this goes last
-	n.UseHandler(mux)
+	m.Use(permissionHandler)
 
 	// Serve
-	n.Run(":3000")
+	m.Run()
 }
