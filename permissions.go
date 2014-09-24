@@ -3,7 +3,6 @@ package permissions
 // Middleware handler for handling requests and permissions
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 )
@@ -51,6 +50,11 @@ func (perm *Permissions) SetDenyFunction(f http.HandlerFunc) {
 	perm.denied = f
 }
 
+// Get the current http.HandlerFunc for when permissions are denied
+func (perm *Permissions) GetDenyFunction() http.HandlerFunc {
+	return perm.denied
+}
+
 // Retrieve the UserState struct
 func (perm *Permissions) UserState() *UserState {
 	return perm.state
@@ -86,13 +90,13 @@ func (perm *Permissions) SetPublicPath(pathPrefixes []string) {
 	perm.publicPathPrefixes = pathPrefixes
 }
 
-// The default "permission denied" http handler
-func PermissionDenied(rw http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(rw, "Permission denied.")
+// The default "permission denied" http handler.
+func PermissionDenied(w http.ResponseWriter, req *http.Request) {
+	http.Error(w, "Permission denied.", http.StatusForbidden)
 }
 
 // Check if a given request should be rejected.
-func (perm *Permissions) Rejected(rw http.ResponseWriter, req *http.Request) bool {
+func (perm *Permissions) Rejected(w http.ResponseWriter, req *http.Request) bool {
 	reject := false
 	path := req.URL.Path // the path of the url that the user wish to visit
 
@@ -141,15 +145,15 @@ func (perm *Permissions) Rejected(rw http.ResponseWriter, req *http.Request) boo
 }
 
 // Negroni middleware handler
-func (perm *Permissions) ServeHTTP(rw http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
+func (perm *Permissions) ServeHTTP(w http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
 	// Check if the user has the right admin/user rights
-	if perm.Rejected(rw, req) {
-		// Permission denied function
-		perm.denied(rw, req)
+	if perm.Rejected(w, req) {
+		// Get and call the Permission Denied function
+		perm.GetDenyFunction()(w, req)
 		// Reject the request by not calling the next handler below
 		return
 	}
 
 	// Call the next middleware handler
-	next(rw, req)
+	next(w, req)
 }
