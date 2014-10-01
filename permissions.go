@@ -60,6 +60,12 @@ func (perm *Permissions) UserState() *UserState {
 	return perm.state
 }
 
+// Set everything to public
+func (perm *Permissions) Clear() {
+	perm.adminPathPrefixes = []string{}
+	perm.userPathPrefixes = []string{}
+}
+
 // Add an url path prefix that is a page for the logged in administrators
 func (perm *Permissions) AddAdminPath(prefix string) {
 	perm.adminPathPrefixes = append(perm.adminPathPrefixes, prefix)
