@@ -345,6 +345,9 @@ func (state *UserState) HashPassword(username, password string) string {
 
 // Check if a password is correct. username is used as part of the hash.
 func (state *UserState) CorrectPassword(username, password string) bool {
+	if !state.HasUser(username) {
+		return false
+	}
 	passwordHash, err := state.GetPasswordHash(username)
 	if err != nil {
 		return false
