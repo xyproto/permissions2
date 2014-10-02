@@ -16,7 +16,8 @@ Features and limitations
 * Supports registration and confirmation via generated confirmation codes.
 * Tries to keep things simple.
 * Only supports "public", "user" and "admin" permissions out of the box, but offers functionality for implementing more fine grained permissions, if so desired.
-* Can also be used together with [Martini](https://github.com/go-martini/martini), either directly or by using the [fizz](https://github.com/xyproto/fizz) package.
+* Can be used together with [Martini](https://github.com/go-martini/martini), either directly or by using the [fizz](https://github.com/xyproto/fizz) package.
+* Can be used together with [Gin](https://github.com/gin-gonic/gin), but there are currently warnings about headers already being written.
 * May also work with other web-related packages, since the standard http.HandlerFunc is used everywhere.
 
 
