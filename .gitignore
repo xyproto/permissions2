@@ -24,3 +24,5 @@ _testmain.go
 
 # Binaries
 example/example
+examples/martini/martini
+examples/gin/gin
