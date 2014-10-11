@@ -295,7 +295,7 @@ func (state *UserState) AddUser(username, password, email string) {
 	state.addUserUnchecked(username, passwordHash, email)
 }
 
-// Mark the user as logged in
+// Mark the user as logged in. Use the Login function instead, unless cookies are not involved.
 func (state *UserState) SetLoggedIn(username string) {
 	state.users.Set(username, "loggedin", "true")
 }
