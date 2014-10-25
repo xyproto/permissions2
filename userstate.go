@@ -31,15 +31,19 @@ type UserState struct {
 	cookieTime   int64                       // How long a cookie should last, in seconds
 }
 
-// Simple way to manage user sessions, uses a pseudorandom cookie secret
+// Create a new *UserState that can be used for managing users.
+// The random number generator will be seeded after generating the cookie secret.
+// A connection pool for the local Redis server (dbindex 0) will be created.
 func NewUserStateSimple() *UserState {
 	// db index 0, initialize random generator after generating the cookie secret
 	return NewUserState(0, true, defaultRedisServer)
 }
 
+// Create a new *UserState that can be used for managing users.
+// dbindex is the Redis database index.
+// If randomseed is true, the random number generator will be seeded after generating the cookie secret.
+// redisHostPort is host:port for the desired Redis server (can be blank for localhost)
 // Also creates a new ConnectionPool.
-// randomseed is normally true, for seeding the random number generator after generating the cookie secret
-// redisHostPort can be blank, for using the local Redis instance
 func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState {
 	var pool *simpleredis.ConnectionPool
 
@@ -335,15 +339,16 @@ func (state *UserState) SetCookieTimeout(cookieTime int64) {
 	state.cookieTime = cookieTime
 }
 
-// New password hashing function, with the username as part of the salt
+// Hash the password, using SHA256, with the cookieSecret and username as part of the salt
 func (state *UserState) HashPassword(username, password string) string {
+	// TODO Consider switching over to bcrypt
 	hasher := sha256.New()
 	// Use the cookie secret as additional salt
 	io.WriteString(hasher, password+state.cookieSecret+username)
 	return string(hasher.Sum(nil))
 }
 
-// Check if a password is correct. username is used as part of the hash.
+// Check if a password is correct. username is needed because it is part of the hash.
 func (state *UserState) CorrectPassword(username, password string) bool {
 	if !state.HasUser(username) {
 		return false
@@ -454,7 +459,7 @@ func (state *UserState) GenerateUniqueConfirmationCode() (string, error) {
 // Check that the given username and password are different.
 // Also check if the chosen username only contains letters, numbers and/or underscore.
 func ValidUsernamePassword(username, password string) error {
-	// TODO: Use a more international selection of letters
+	// TODO Use a more international selection of letters?
 	const allowed_letters = "abcdefghijklmnopqrstuvwxyzæøåABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ_0123456789"
 NEXT:
 	for _, letter := range username {
