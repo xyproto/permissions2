@@ -13,6 +13,7 @@ Features and limitations
 
 * Uses secure cookies and stores user information in a Redis database. 
 * Suitable for running a local Redis server, registering/confirming users and managing public/user/admin pages.
+* Also supports connecting to remote Redis servers.
 * Supports registration and confirmation via generated confirmation codes.
 * Tries to keep things simple.
 * Only supports "public", "user" and "admin" permissions out of the box, but offers functionality for implementing more fine grained permissions, if so desired.
