@@ -18,6 +18,7 @@ Features and limitations
 * Tries to keep things simple.
 * Only supports "public", "user" and "admin" permissions out of the box, but offers functionality for implementing more fine grained permissions, if so desired.
 * Can be used together with [Martini](https://github.com/go-martini/martini), either directly or by using the [fizz](https://github.com/xyproto/fizz) package.
+* Also works together with [Gin](https://github.com/gin-gonic/gin).
 * May also work with other web-related packages, since the standard http.HandlerFunc is used everywhere.
 
 
