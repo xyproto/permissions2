@@ -19,9 +19,9 @@ func main() {
 	permissionHandler := func(c *gin.Context) {
 		// Check if the user has the right admin/user rights
 		if perm.Rejected(c.Writer, c.Request) {
-			fmt.Fprint(c.Writer, "Permission denied!")
 			// Deny the request, don't call other middleware handlers
 			c.Abort(http.StatusForbidden)
+			fmt.Fprint(c.Writer, "Permission denied!")
 			return
 		}
 		// Call the next middleware handler
