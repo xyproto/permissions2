@@ -2,6 +2,7 @@ package permissions
 
 import (
 	"crypto/sha256"
+	"crypto/subtle"
 	"errors"
 	"fmt"
 	"io"
@@ -387,14 +388,34 @@ func (state *UserState) HashPassword(username, password string) string {
 
 // Check if a password is correct. username is needed because it is part of the hash.
 func (state *UserState) CorrectPassword(username, password string) bool {
+
 	if !state.HasUser(username) {
 		return false
 	}
-	passwordHash, err := state.GetPasswordHash(username)
+
+	hash, err := state.GetPasswordHash(username)
 	if err != nil {
 		return false
 	}
-	return passwordHash == state.HashPassword(username, password)
+
+	switch state.passwordAlgo {
+	case "sha256":
+		// prevent timing attacks
+		if subtle.ConstantTimeCompare([]byte(hash), []byte(state.HashPassword(username, password))) != 1 {
+			return false
+		} else {
+			return true
+		}
+	case "bcrypt":
+		// prevents timing attack compliant
+		if bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) != nil {
+			return false
+		} else {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Goes through all the confirmationCodes of all the unconfirmed users
