@@ -42,15 +42,15 @@ func TestPasswordBasic(t *testing.T) {
 	userstate := NewUserStateSimple()
 
 	// assert default password aglo is sha256
-	if userstate.GetPasswordAlgo() != "sha256" {
-		t.Error("Error, sha256 should be default password algorithm")
+	if userstate.GetPasswordAlgo() != "bcrypt" {
+		t.Error("Error, bcrypt should be default password algorithm")
 	}
 
 	// set password algo
-	userstate.SetPasswordAlgo("bcrypt")
+	userstate.SetPasswordAlgo("sha256")
 
 	// assert change should be bcrypt
-	if userstate.GetPasswordAlgo() != "bcrypt" {
+	if userstate.GetPasswordAlgo() != "sha256" {
 		t.Error("Error, setting password algorithm failed")
 	}
 
