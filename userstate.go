@@ -3,11 +3,15 @@ package permissions
 import (
 	"crypto/sha256"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
 	"net/http"
 	"time"
+
+	//google
+	"code.google.com/p/go.crypto/bcrypt"
 
 	"github.com/xyproto/simpleredis"
 )
@@ -29,6 +33,7 @@ type UserState struct {
 	dbindex      int                         // Redis database index
 	cookieSecret string                      // Secret for storing secure cookies
 	cookieTime   int64                       // How long a cookie should last, in seconds
+	passwordAlgo string                      // The hashing algorithm to utilize default: "sha256" allowed: ("sha256", "bcrypt")
 }
 
 // Create a new *UserState that can be used for managing users.
@@ -86,6 +91,9 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 
 	// Cookies lasts for 24 hours by default. Specified in seconds.
 	state.cookieTime = defaultCookieTime
+
+	// Default password algorithm is "sha256" options ("sha256", "bcrypt")
+	state.passwordAlgo = "sha256"
 
 	return state
 }
@@ -339,13 +347,42 @@ func (state *UserState) SetCookieTimeout(cookieTime int64) {
 	state.cookieTime = cookieTime
 }
 
-// Hash the password, using SHA256, with the cookieSecret and username as part of the salt
+// Get current password algorithm
+func (state *UserState) GetPasswordAlgo() string {
+	return state.passwordAlgo
+}
+
+// Set password algorithm
+func (state *UserState) SetPasswordAlgo(algo string) {
+	switch algo {
+	case "sha256":
+		state.passwordAlgo = algo
+	case "bcrypt":
+		state.passwordAlgo = algo
+	default:
+		panic(fmt.Sprintf("Permissions: '%v' is an unsupported encryption algorithm", algo))
+	}
+}
+
+// Hash the password
+// if using sha256, use the cookieSecret and username as part of the salt
+// if using bcrypt, rely on it for salting
 func (state *UserState) HashPassword(username, password string) string {
-	// TODO Consider switching over to bcrypt
-	hasher := sha256.New()
-	// Use the cookie secret as additional salt
-	io.WriteString(hasher, password+state.cookieSecret+username)
-	return string(hasher.Sum(nil))
+	switch state.passwordAlgo {
+	case "sha256":
+		hasher := sha256.New()
+		// Use the cookie secret as additional salt
+		io.WriteString(hasher, password+state.cookieSecret+username)
+		return string(hasher.Sum(nil))
+	case "bcrypt":
+		hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			panic("Permissions: bcrypt password hashing unsuccessful")
+		}
+		return string(hash)
+	default:
+		panic(fmt.Sprintf("Permissions: '%v' is an unsupported encryption algorithm", state.passwordAlgo))
+	}
 }
 
 // Check if a password is correct. username is needed because it is part of the hash.

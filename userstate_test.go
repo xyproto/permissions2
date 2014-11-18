@@ -37,3 +37,35 @@ func TestPerm(t *testing.T) {
 		t.Error("Error, user bob should not exist")
 	}
 }
+
+func TestPasswordBasic(t *testing.T) {
+	userstate := NewUserStateSimple()
+
+	// assert default password aglo is sha256
+	if userstate.GetPasswordAlgo() != "sha256" {
+		t.Error("Error, sha256 should be default password algorithm")
+	}
+
+	// set password algo
+	userstate.SetPasswordAlgo("bcrypt")
+
+	// assert change should be bcrypt
+	if userstate.GetPasswordAlgo() != "bcrypt" {
+		t.Error("Error, setting password algorithm failed")
+	}
+
+}
+
+func TestPasswordAlgoMatching(t *testing.T) {
+	userstate := NewUserStateSimple()
+	// generate two different password using the same credentials but different algos
+	userstate.SetPasswordAlgo("sha256")
+	sha256_hash := userstate.HashPassword("testuser@example.com", "textpassword")
+	userstate.SetPasswordAlgo("bcrypt")
+	bcrypt_hash := userstate.HashPassword("testuser@example.com", "textpassword")
+
+	// they shouldn't match
+	if sha256_hash == bcrypt_hash {
+		t.Error("Error, different algorithms should not have a password match")
+	}
+}
