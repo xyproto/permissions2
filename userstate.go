@@ -34,7 +34,7 @@ type UserState struct {
 	dbindex      int                         // Redis database index
 	cookieSecret string                      // Secret for storing secure cookies
 	cookieTime   int64                       // How long a cookie should last, in seconds
-	passwordAlgo string                      // The hashing algorithm to utilize default: "sha256" allowed: ("sha256", "bcrypt")
+	passwordAlgo string                      // The hashing algorithm to utilize default: "bcrypt" allowed: ("sha256", "bcrypt")
 }
 
 // Create a new *UserState that can be used for managing users.
@@ -93,8 +93,8 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 	// Cookies lasts for 24 hours by default. Specified in seconds.
 	state.cookieTime = defaultCookieTime
 
-	// Default password algorithm is "sha256" options ("sha256", "bcrypt")
-	state.passwordAlgo = "sha256"
+	// Default password algorithm is "bcrypt" options ("sha256", "bcrypt")
+	state.passwordAlgo = "bcrypt"
 
 	return state
 }
@@ -407,7 +407,7 @@ func (state *UserState) CorrectPassword(username, password string) bool {
 			return true
 		}
 	case "bcrypt":
-		// prevents timing attack compliant
+		// prevents timing attack
 		if bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) != nil {
 			return false
 		} else {
