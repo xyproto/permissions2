@@ -69,3 +69,9 @@ func TestPasswordAlgoMatching(t *testing.T) {
 		t.Error("Error, different algorithms should not have a password match")
 	}
 }
+
+func TestUserStateKeeper(t *testing.T) {
+	userstate := NewUserStateSimple()
+	// Check that the userstate qualifies for the UserStateKeeper interface
+	var _ UserStateKeeper = userstate
+}
