@@ -18,7 +18,7 @@ type Permissions struct {
 
 const (
 	// Version number. Stable API within major version numbers.
-	Version = 1.0
+	Version = 2.0
 )
 
 // Initialize a Permissions struct with all the default settings.
@@ -51,7 +51,7 @@ func (perm *Permissions) SetDenyFunction(f http.HandlerFunc) {
 }
 
 // Get the current http.HandlerFunc for when permissions are denied
-func (perm *Permissions) GetDenyFunction() http.HandlerFunc {
+func (perm *Permissions) DenyFunction() http.HandlerFunc {
 	return perm.denied
 }
 
@@ -155,7 +155,7 @@ func (perm *Permissions) ServeHTTP(w http.ResponseWriter, req *http.Request, nex
 	// Check if the user has the right admin/user rights
 	if perm.Rejected(w, req) {
 		// Get and call the Permission Denied function
-		perm.GetDenyFunction()(w, req)
+		perm.DenyFunction()(w, req)
 		// Reject the request by not calling the next handler below
 		return
 	}
