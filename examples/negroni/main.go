@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/codegangsta/negroni"
-	"github.com/xyproto/permissions"
+	"github.com/xyproto/permissions2"
 )
 
 func main() {
@@ -16,6 +16,9 @@ func main() {
 	// New permissions middleware
 	perm := permissions.New()
 
+	// Blank slate, no default permissions
+	//perm.Clear()
+
 	// Get the userstate, used in the handlers below
 	userstate := perm.UserState()
 
@@ -23,7 +26,7 @@ func main() {
 		fmt.Fprintf(w, "Has user bob: %v\n", userstate.HasUser("bob"))
 		fmt.Fprintf(w, "Logged in on server: %v\n", userstate.IsLoggedIn("bob"))
 		fmt.Fprintf(w, "Is confirmed: %v\n", userstate.IsConfirmed("bob"))
-		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.GetUsername(req))
+		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.Username(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(req))
 		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
@@ -65,7 +68,7 @@ func main() {
 
 	mux.HandleFunc("/admin", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "super secret information that only logged in administrators must see!\n\n")
-		if usernames, err := userstate.GetAllUsernames(); err == nil {
+		if usernames, err := userstate.AllUsernames(); err == nil {
 			fmt.Fprintf(w, "list of all users: "+strings.Join(usernames, ", "))
 		}
 	})

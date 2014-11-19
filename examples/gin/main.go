@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xyproto/permissions"
+	"github.com/xyproto/permissions2"
 )
 
 func main() {
@@ -14,6 +14,9 @@ func main() {
 
 	// New permissions middleware
 	perm := permissions.New()
+
+	// Blank slate, no default permissions
+	//perm.Clear()
 
 	// Set up a middleware handler for Gin, with a custom "permission denied" message.
 	permissionHandler := func(c *gin.Context) {
@@ -45,7 +48,7 @@ func main() {
 		msg += fmt.Sprintf("Has user bob: %v\n", userstate.HasUser("bob"))
 		msg += fmt.Sprintf("Logged in on server: %v\n", userstate.IsLoggedIn("bob"))
 		msg += fmt.Sprintf("Is confirmed: %v\n", userstate.IsConfirmed("bob"))
-		msg += fmt.Sprintf("Username stored in cookies (or blank): %v\n", userstate.GetUsername(c.Request))
+		msg += fmt.Sprintf("Username stored in cookies (or blank): %v\n", userstate.Username(c.Request))
 		msg += fmt.Sprintf("Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(c.Request))
 		msg += fmt.Sprintf("Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(c.Request))
 		msg += fmt.Sprintln("\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
@@ -89,7 +92,7 @@ func main() {
 
 	g.GET("/admin", func(c *gin.Context) {
 		c.String(http.StatusOK, "super secret information that only logged in administrators must see!\n\n")
-		if usernames, err := userstate.GetAllUsernames(); err == nil {
+		if usernames, err := userstate.AllUsernames(); err == nil {
 			c.String(http.StatusOK, "list of all users: "+strings.Join(usernames, ", "))
 		}
 	})

@@ -1,11 +1,11 @@
-#Permissions [![Build Status](https://travis-ci.org/xyproto/permissions.svg?branch=master)](https://travis-ci.org/xyproto/permissions) [![GoDoc](https://godoc.org/github.com/xyproto/permissions?status.svg)](http://godoc.org/github.com/xyproto/permissions)
+#Permissions [![Build Status](https://travis-ci.org/xyproto/permissions2.svg?branch=master)](https://travis-ci.org/xyproto/permissions2) [![GoDoc](https://godoc.org/github.com/xyproto/permissions2?status.svg)](http://godoc.org/github.com/xyproto/permissions2)
 
 Middleware for [Negroni](https://github.com/codegangsta/negroni), for keeping track of users, login states and permissions.
 
 Online API Documentation
 ------------------------
 
-[godoc.org](http://godoc.org/github.com/xyproto/permissions)
+[godoc.org](http://godoc.org/github.com/xyproto/permissions2)
 
 Versions
 --------
@@ -39,7 +39,7 @@ import (
 	"strings"
 
 	"github.com/codegangsta/negroni"
-	"github.com/xyproto/permissions"
+	"github.com/xyproto/permissions2"
 )
 
 func main() {
@@ -50,7 +50,7 @@ func main() {
 	perm := permissions.New()
 
         // Blank slate, no default permissions
-	// perm.Clear()
+	//perm.Clear()
 
 	// Get the userstate, used in the handlers below
 	userstate := perm.UserState()
@@ -59,7 +59,7 @@ func main() {
 		fmt.Fprintf(w, "Has user bob: %v\n", userstate.HasUser("bob"))
 		fmt.Fprintf(w, "Logged in on server: %v\n", userstate.IsLoggedIn("bob"))
 		fmt.Fprintf(w, "Is confirmed: %v\n", userstate.IsConfirmed("bob"))
-		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.GetUsername(req))
+		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.Username(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(req))
 		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
@@ -101,7 +101,7 @@ func main() {
 
 	mux.HandleFunc("/admin", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "super secret information that only logged in administrators must see!\n\n")
-		if usernames, err := userstate.GetAllUsernames(); err == nil {
+		if usernames, err := userstate.AllUsernames(); err == nil {
 			fmt.Fprintf(w, "list of all users: "+strings.Join(usernames, ", "))
 		}
 	})
@@ -133,7 +133,7 @@ import (
 	"strings"
 
 	"github.com/go-martini/martini"
-	"github.com/xyproto/permissions"
+	"github.com/xyproto/permissions2"
 )
 
 func main() {
@@ -142,6 +142,9 @@ func main() {
 	// New permissions middleware
 	perm := permissions.New()
 
+        // Blank slate, no default permissions
+	//perm.Clear()
+
 	// Get the userstate, used in the handlers below
 	userstate := perm.UserState()
 
@@ -149,7 +152,7 @@ func main() {
 		fmt.Fprintf(w, "Has user bob: %v\n", userstate.HasUser("bob"))
 		fmt.Fprintf(w, "Logged in on server: %v\n", userstate.IsLoggedIn("bob"))
 		fmt.Fprintf(w, "Is confirmed: %v\n", userstate.IsConfirmed("bob"))
-		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.GetUsername(req))
+		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.Username(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(req))
 		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
@@ -191,7 +194,7 @@ func main() {
 
 	m.Get("/admin", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "super secret information that only logged in administrators must see!\n\n")
-		if usernames, err := userstate.GetAllUsernames(); err == nil {
+		if usernames, err := userstate.AllUsernames(); err == nil {
 			fmt.Fprintf(w, "list of all users: "+strings.Join(usernames, ", "))
 		}
 	})
@@ -218,6 +221,7 @@ func main() {
 }
 ~~~
 
+
 Default permissions
 -------------------
 
@@ -225,32 +229,17 @@ Default permissions
 * These path prefixes has user rights by default: */repo* and */data*
 * These path prefixes are public by default: */*, */login*, */register*, */style*, */img*, */js*, */favicon.ico*, */robots.txt* and */sitemap_index.xml*
 
+
 Password hashing
 ----------------
 
 * "bcrypt" is used by default for hashing passwords, but it can be changed to "sha256" for backwards compatibility.
-* This parameter should be set and left. Switching algos after shipping code to production is not supported.
-
-~~~go
-[...]
-
-func main() {
-	n := negroni.Classic()
-	mux := http.NewServeMux()
-
-	// New permissions middleware
-	perm := permissions.New()
-
-	// Get the userstate, used in the handlers below
-	userstate := perm.UserState()
-
-[...]
-~~~
+* This parameter should be set and left. Switching the algorithm for applications that already has stored password hashes will cause problems.
 
 General information
 -------------------
 
-* Version: 1.0
+* Version: 2.0
 * License: MIT
 * Alexander F Rødseth
 
