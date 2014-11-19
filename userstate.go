@@ -36,7 +36,6 @@ type UserState struct {
 }
 
 // Huge interface for making it possible to depend on different versions of the permission package
-// TODO: Make the simpleredis things into interfaces
 type UserStateKeeper interface {
 	DatabaseIndex() int
 	Pool() *simpleredis.ConnectionPool
