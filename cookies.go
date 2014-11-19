@@ -1,6 +1,6 @@
 package permissions
 
-// Thanks to web.go for several of these functions
+// Thanks to web.go (https://github.com/hoisie/web) for several of these functions
 
 import (
 	"bytes"

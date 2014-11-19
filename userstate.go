@@ -11,9 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	//google
 	"code.google.com/p/go.crypto/bcrypt"
-
 	"github.com/xyproto/simpleredis"
 )
 
@@ -401,18 +399,10 @@ func (state *UserState) CorrectPassword(username, password string) bool {
 	switch state.passwordAlgo {
 	case "sha256":
 		// prevent timing attacks
-		if subtle.ConstantTimeCompare([]byte(hash), []byte(state.HashPassword(username, password))) != 1 {
-			return false
-		} else {
-			return true
-		}
+		return subtle.ConstantTimeCompare([]byte(hash), []byte(state.HashPassword(username, password))) == 1
 	case "bcrypt":
 		// prevents timing attack
-		if bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) != nil {
-			return false
-		} else {
-			return true
-		}
+		return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 	}
 
 	return false
