@@ -35,7 +35,7 @@ type UserState struct {
 	passwordAlgo string                      // The hashing algorithm to utilize default: "bcrypt" allowed: ("sha256", "bcrypt")
 }
 
-// Huge interface for making it possible to depend on different versions of this permission package
+// Huge interface for making it possible to depend on different versions of the permission package
 // TODO: Make the simpleredis things into interfaces
 type UserStateKeeper interface {
 	DatabaseIndex() int
