@@ -35,6 +35,55 @@ type UserState struct {
 	passwordAlgo string                      // The hashing algorithm to utilize default: "bcrypt" allowed: ("sha256", "bcrypt")
 }
 
+// Huge interface for making it possible to depend on different versions of this permission package
+// TODO: Make the simpleredis things into interfaces
+type UserStateKeeper interface {
+	DatabaseIndex() int
+	Pool() *simpleredis.ConnectionPool
+	Close()
+	UserRights(req *http.Request) bool
+	HasUser(username string) bool
+	BooleanField(username, fieldname string) bool
+	SetBooleanField(username, fieldname string, val bool)
+	IsConfirmed(username string) bool
+	IsLoggedIn(username string) bool
+	AdminRights(req *http.Request) bool
+	IsAdmin(username string) bool
+	UsernameCookie(req *http.Request) (string, error)
+	SetUsernameCookie(w http.ResponseWriter, username string) error
+	AllUsernames() ([]string, error)
+	Email(username string) (string, error)
+	PasswordHash(username string) (string, error)
+	AllUnconfirmedUsernames() ([]string, error)
+	ConfirmationCode(username string) (string, error)
+	Users() *simpleredis.HashMap
+	AddUnconfirmed(username, confirmationCode string)
+	RemoveUnconfirmed(username string)
+	MarkConfirmed(username string)
+	RemoveUser(username string)
+	SetAdminStatus(username string)
+	RemoveAdminStatus(username string)
+	addUserUnchecked(username, passwordHash, email string)
+	AddUser(username, password, email string)
+	SetLoggedIn(username string)
+	SetLoggedOut(username string)
+	Login(w http.ResponseWriter, username string)
+	Logout(username string)
+	Username(req *http.Request) string
+	CookieTimeout(username string) int64
+	SetCookieTimeout(cookieTime int64)
+	PasswordAlgo() string
+	SetPasswordAlgo(algo string)
+	HashPassword(username, password string) string
+	CorrectPassword(username, password string) bool
+	AlreadyHasConfirmationCode(confirmationCode string) bool
+	FindUserByConfirmationCode(confirmationcode string) (string, error)
+	Confirm(username string)
+	ConfirmUserByConfirmationCode(confirmationcode string) error
+	SetMinimumConfirmationCodeLength(length int)
+	GenerateUniqueConfirmationCode() (string, error)
+}
+
 // Create a new *UserState that can be used for managing users.
 // The random number generator will be seeded after generating the cookie secret.
 // A connection pool for the local Redis server (dbindex 0) will be created.
