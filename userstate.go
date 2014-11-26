@@ -405,7 +405,7 @@ func (state *UserState) SetPasswordAlgo(algo string) {
 	// If algo is "any", bcrypt will be used when hashing and both
 	// valid bcrypt and sha256 hashes will be allowed when comparing.
 	switch algo {
-	case "sha256", "bcrypt", "any":
+	case "sha256", "bcrypt": //, "any":
 		state.passwordAlgo = algo
 	default:
 		panic(fmt.Sprintf("Permissions: '%v' is an unsupported encryption algorithm", algo))
@@ -422,7 +422,7 @@ func (state *UserState) HashPassword(username, password string) string {
 		// Use the cookie secret as additional salt
 		io.WriteString(hasher, password+state.cookieSecret+username)
 		return string(hasher.Sum(nil))
-	case "bcrypt", "any":
+	case "bcrypt": //, "any":
 		hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			panic("Permissions: bcrypt password hashing unsuccessful")
@@ -462,8 +462,8 @@ func (state *UserState) CorrectPassword(username, password string) bool {
 		return state.correct_sha256(hash, username, password)
 	case "bcrypt":
 		return correct_bcrypt(hash, password)
-	case "any": // only use for backwards compatibility
-		return state.correct_sha256(hash, username, password) || correct_bcrypt(hash, password)
+		//case "any": // only use for backwards compatibility
+		//	return state.correct_sha256(hash, username, password) || correct_bcrypt(hash, password)
 
 	}
 
