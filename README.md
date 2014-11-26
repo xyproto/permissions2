@@ -229,6 +229,7 @@ Password hashing
 ----------------
 
 * "bcrypt" is used by default for hashing passwords, but it can be changed to "sha256" for backwards compatibility.
+* For creating new hashes with bcrypt, but being able to check old password hashes with sha256, doing `userstate.SetPasswordAlgo("any")` is possible.
 * This parameter should be set and left. Switching the algorithm for applications that already has stored password hashes will cause problems.
 
 General information
