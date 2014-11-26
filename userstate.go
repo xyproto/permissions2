@@ -32,7 +32,7 @@ type UserState struct {
 	dbindex      int                         // Redis database index
 	cookieSecret string                      // Secret for storing secure cookies
 	cookieTime   int64                       // How long a cookie should last, in seconds
-	passwordAlgo string                      // The hashing algorithm to utilize default: "bcrypt" allowed: ("sha256", "bcrypt")
+	passwordAlgo string                      // The hashing algorithm to utilize default: "any" allowed: ("sha256", "bcrypt", "any")
 }
 
 // Huge interface for making it possible to depend on different versions of the permission package
@@ -139,7 +139,8 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 	// Cookies lasts for 24 hours by default. Specified in seconds.
 	state.cookieTime = defaultCookieTime
 
-	// Default password algorithm is "bcrypt" options ("sha256", "bcrypt")
+	// Default password algorithm is "bcrypt".
+	// These are possible values: "sha256", "bcrypt", "any"
 	state.passwordAlgo = "bcrypt"
 
 	return state
@@ -401,10 +402,10 @@ func (state *UserState) PasswordAlgo() string {
 
 // Set password algorithm
 func (state *UserState) SetPasswordAlgo(algo string) {
+	// If algo is "any", bcrypt will be used when hashing and both
+	// valid bcrypt and sha256 hashes will be allowed when comparing.
 	switch algo {
-	case "sha256":
-		state.passwordAlgo = algo
-	case "bcrypt":
+	case "sha256", "bcrypt", "any":
 		state.passwordAlgo = algo
 	default:
 		panic(fmt.Sprintf("Permissions: '%v' is an unsupported encryption algorithm", algo))
@@ -421,7 +422,7 @@ func (state *UserState) HashPassword(username, password string) string {
 		// Use the cookie secret as additional salt
 		io.WriteString(hasher, password+state.cookieSecret+username)
 		return string(hasher.Sum(nil))
-	case "bcrypt":
+	case "bcrypt", "any":
 		hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			panic("Permissions: bcrypt password hashing unsuccessful")
@@ -430,6 +431,18 @@ func (state *UserState) HashPassword(username, password string) string {
 	default:
 		panic(fmt.Sprintf("Permissions: '%v' is an unsupported encryption algorithm", state.passwordAlgo))
 	}
+}
+
+// Check if a given password(+username) is correct
+func (state *UserState) correct_sha256(hash, username, password string) bool {
+	// prevents timing attack
+	return subtle.ConstantTimeCompare([]byte(hash), []byte(state.HashPassword(username, password))) == 1
+}
+
+// Check if a given password is correct
+func correct_bcrypt(hash, password string) bool {
+	// prevents timing attack
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }
 
 // Check if a password is correct. username is needed because it is part of the hash.
@@ -446,11 +459,12 @@ func (state *UserState) CorrectPassword(username, password string) bool {
 
 	switch state.passwordAlgo {
 	case "sha256":
-		// prevent timing attacks
-		return subtle.ConstantTimeCompare([]byte(hash), []byte(state.HashPassword(username, password))) == 1
+		return state.correct_sha256(hash, username, password)
 	case "bcrypt":
-		// prevents timing attack
-		return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
+		return correct_bcrypt(hash, password)
+	case "any": // only use for backwards compatibility
+		return state.correct_sha256(hash, username, password) || correct_bcrypt(hash, password)
+
 	}
 
 	return false
