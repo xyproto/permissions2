@@ -1,6 +1,8 @@
 package permissions
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestPerm(t *testing.T) {
 	userstate := NewUserStateSimple()
@@ -41,9 +43,9 @@ func TestPerm(t *testing.T) {
 func TestPasswordBasic(t *testing.T) {
 	userstate := NewUserStateSimple()
 
-	// Assert that the default password algorithm is bcrypt
-	if userstate.PasswordAlgo() != "bcrypt" {
-		t.Error("Error, bcrypt should be the default password algorithm")
+	// Assert that the default password algorithm is "bcrypt+"
+	if userstate.PasswordAlgo() != "bcrypt+" {
+		t.Error("Error, bcrypt+ should be the default password algorithm")
 	}
 
 	// Set password algorithm
@@ -63,6 +65,9 @@ func TestPasswordAlgoMatching(t *testing.T) {
 	sha256_hash := userstate.HashPassword("testuser@example.com", "textpassword")
 	userstate.SetPasswordAlgo("bcrypt")
 	bcrypt_hash := userstate.HashPassword("testuser@example.com", "textpassword")
+
+	//log.Println("sha256_hash length:", len(sha256_hash))
+	//log.Println("bcrypt_hash length:", len(bcrypt_hash))
 
 	// they shouldn't match
 	if sha256_hash == bcrypt_hash {

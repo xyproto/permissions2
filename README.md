@@ -228,8 +228,8 @@ Default permissions
 Password hashing
 ----------------
 
-* "bcrypt" is used by default for hashing passwords, but it can be changed to "sha256" for backwards compatibility.
-* This parameter should be set and left. Switching the algorithm for applications that already has stored password hashes will cause problems.
+* "bcrypt" is used by default for hashing passwords. "sha256" is also possible.
+* By default, old sha256 passwords will also be checked. This can be disabled by setting the password hashing algorithm to "bcrypt" as opposed to "bcrypt+". Example: `userstate.SetPasswordAlgo("bcrypt")`
 
 General information
 -------------------
