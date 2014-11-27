@@ -469,7 +469,9 @@ func (state *UserState) CorrectPassword(username, password string) bool {
 		return correct_bcrypt(hash, password)
 	case "bcrypt+": // for backwards compatibility with sha256
 		if len(hash) == 32 {
-			return state.correct_sha256(hash, username, password)
+			if state.correct_sha256(hash, username, password) {
+				return true
+			}
 		} else {
 			return correct_bcrypt(hash, password)
 		}
