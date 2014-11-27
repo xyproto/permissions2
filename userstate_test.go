@@ -44,7 +44,7 @@ func TestPasswordBasic(t *testing.T) {
 	userstate := NewUserStateSimple()
 
 	// Assert that the default password algorithm is "bcrypt+"
-	if userstate.PasswordAlgo() != "bcrypt+" {
+	if userstate.PasswordAlgo() != "bcrypt" {
 		t.Error("Error, bcrypt+ should be the default password algorithm")
 	}
 

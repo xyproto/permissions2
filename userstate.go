@@ -141,7 +141,7 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 
 	// Default password algorithm is "bcrypt+", which is the same as "bcrypt",
 	// but with backwards compatibility for checking sha256 hashes.
-	state.passwordAlgo = "bcrypt+" // "bcrypt+", "bcrypt" or "sha256"
+	state.passwordAlgo = "bcrypt" // "bcrypt+", "bcrypt" or "sha256"
 
 	return state
 }
