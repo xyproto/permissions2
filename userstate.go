@@ -435,8 +435,13 @@ func (state *UserState) HashPassword(username, password string) string {
 
 // Check if a given password(+username) is correct, for a given sha256 hash
 func (state *UserState) correct_sha256(hash, username, password string) bool {
+	comparisonHash := state.HashPassword(username, password)
+	// check that the lengths are equal before calling ConstantTimeCompare
+	if len(comparisonHash) != len(hash) {
+		return false
+	}
 	// prevents timing attack
-	return subtle.ConstantTimeCompare([]byte(hash), []byte(state.HashPassword(username, password))) == 1
+	return subtle.ConstantTimeCompare([]byte(hash), []byte(comparisonHash)) == 1
 }
 
 // Check if a given password is correct, for a given bcrypt hash
