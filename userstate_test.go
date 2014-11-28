@@ -44,7 +44,7 @@ func TestPasswordBasic(t *testing.T) {
 	userstate := NewUserStateSimple()
 
 	// Assert that the default password algorithm is "bcrypt+"
-	if userstate.PasswordAlgo() != "bcrypt" {
+	if userstate.PasswordAlgo() != "bcrypt+" {
 		t.Error("Error, bcrypt+ should be the default password algorithm")
 	}
 
@@ -58,6 +58,29 @@ func TestPasswordBasic(t *testing.T) {
 
 }
 
+func TestPasswordBackward(t *testing.T) {
+	userstate := NewUserStateSimple()
+	userstate.SetPasswordAlgo("sha256")
+	userstate.AddUser("bob", "hunter1", "bob@zombo.com")
+	if !userstate.HasUser("bob") {
+		t.Error("Error, user bob should exist")
+	}
+	userstate.SetPasswordAlgo("sha256")
+	if !userstate.CorrectPassword("bob", "hunter1") {
+		t.Error("Error, the sha256 password really is correct")
+	}
+
+	userstate.SetPasswordAlgo("bcrypt")
+	if userstate.CorrectPassword("bob", "hunter1") {
+		t.Error("Error, the password as stored as sha256, not bcrypt")
+	}
+
+	userstate.SetPasswordAlgo("bcrypt+")
+	if !userstate.CorrectPassword("bob", "hunter1") {
+		t.Error("Error, the sha256 password is not correct when checking with bcrypt+")
+	}
+}
+
 func TestPasswordAlgoMatching(t *testing.T) {
 	userstate := NewUserStateSimple()
 	// generate two different password using the same credentials but different algos
@@ -65,9 +88,6 @@ func TestPasswordAlgoMatching(t *testing.T) {
 	sha256_hash := userstate.HashPassword("testuser@example.com", "textpassword")
 	userstate.SetPasswordAlgo("bcrypt")
 	bcrypt_hash := userstate.HashPassword("testuser@example.com", "textpassword")
-
-	//log.Println("sha256_hash length:", len(sha256_hash))
-	//log.Println("bcrypt_hash length:", len(bcrypt_hash))
 
 	// they shouldn't match
 	if sha256_hash == bcrypt_hash {

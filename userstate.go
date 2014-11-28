@@ -1,17 +1,12 @@
 package permissions
 
 import (
-	"crypto/sha256"
-	"crypto/subtle"
 	"errors"
-	"fmt"
-	"io"
 	"log"
 	"math/rand"
 	"net/http"
 	"time"
 
-	"code.google.com/p/go.crypto/bcrypt"
 	"github.com/xyproto/simpleredis"
 )
 
@@ -35,11 +30,8 @@ type UserState struct {
 	passwordAlgo string                      // The hashing algorithm to utilize default: "bcrypt+" allowed: ("sha256", "bcrypt", "bcrypt+")
 }
 
-// Huge interface for making it possible to depend on different versions of the permission package
+// Huge interface for making it possible to depend on different versions of the permission package, or other packages that implement userstates
 type UserStateKeeper interface {
-	DatabaseIndex() int
-	Pool() *simpleredis.ConnectionPool
-	Close()
 	UserRights(req *http.Request) bool
 	HasUser(username string) bool
 	BooleanField(username, fieldname string) bool
@@ -55,7 +47,6 @@ type UserStateKeeper interface {
 	PasswordHash(username string) (string, error)
 	AllUnconfirmedUsernames() ([]string, error)
 	ConfirmationCode(username string) (string, error)
-	Users() *simpleredis.HashMap
 	AddUnconfirmed(username, confirmationCode string)
 	RemoveUnconfirmed(username string)
 	MarkConfirmed(username string)
@@ -72,7 +63,7 @@ type UserStateKeeper interface {
 	CookieTimeout(username string) int64
 	SetCookieTimeout(cookieTime int64)
 	PasswordAlgo() string
-	SetPasswordAlgo(algo string)
+	SetPasswordAlgo(algo string) error
 	HashPassword(username, password string) string
 	CorrectPassword(username, password string) bool
 	AlreadyHasConfirmationCode(confirmationCode string) bool
@@ -81,6 +72,12 @@ type UserStateKeeper interface {
 	ConfirmUserByConfirmationCode(confirmationcode string) error
 	SetMinimumConfirmationCodeLength(length int)
 	GenerateUniqueConfirmationCode() (string, error)
+
+	// TODO: Decouple the backend
+	Users() *simpleredis.HashMap
+	DatabaseIndex() int
+	Pool() *simpleredis.ConnectionPool
+	Close()
 }
 
 // Create a new *UserState that can be used for managing users.
@@ -141,7 +138,7 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 
 	// Default password algorithm is "bcrypt+", which is the same as "bcrypt",
 	// but with backwards compatibility for checking sha256 hashes.
-	state.passwordAlgo = "bcrypt" // "bcrypt+", "bcrypt" or "sha256"
+	state.passwordAlgo = "bcrypt+" // "bcrypt+", "bcrypt" or "sha256"
 
 	return state
 }
@@ -401,53 +398,41 @@ func (state *UserState) PasswordAlgo() string {
 }
 
 // Set the password hashing algorithm that should be used
-func (state *UserState) SetPasswordAlgo(algo string) {
-	// If algo is "bcrypt+", bcrypt will be used when hashing and previously
-	// stored bcrypt and sha256 hashes will be tested when comparing.
+// Possible values are:
+//    "bcrypt"  -> Store and check passwords with the bcrypt hash.
+//    "sha256"  -> Store and check passwords with the sha256 hash.
+//    "bcrypt+" -> Store passwords with bcrypt, but check with both
+//                 bcrypt and sha256, for backwards compatibility
+//                 with old passwords that has been stored as sha256.
+func (state *UserState) SetPasswordAlgo(algo string) error {
 	switch algo {
 	case "sha256", "bcrypt", "bcrypt+":
 		state.passwordAlgo = algo
 	default:
-		panic(fmt.Sprintf("Permissions: '%v' is an unsupported encryption algorithm", algo))
+		return errors.New("Permissions: " + algo + " is an unsupported encryption algorithm")
 	}
+	return nil
 }
 
-// Hash the password
-// if using sha256, use the cookieSecret and username as part of the salt
-// if using bcrypt, rely on it for salting
+// Hash the password (the username is needed for salting when using sha256)
 func (state *UserState) HashPassword(username, password string) string {
 	switch state.passwordAlgo {
 	case "sha256":
-		hasher := sha256.New()
-		// Use the cookie secret as additional salt
-		io.WriteString(hasher, password+state.cookieSecret+username)
-		return string(hasher.Sum(nil))
+		return string(hash_sha256(state.cookieSecret, username, password))
 	case "bcrypt", "bcrypt+":
-		hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		if err != nil {
-			panic("Permissions: bcrypt password hashing unsuccessful")
-		}
-		return string(hash)
-	default:
-		panic(fmt.Sprintf("Permissions: '%v' is an unsupported encryption algorithm", state.passwordAlgo))
+		return string(hash_bcrypt(password))
 	}
+	// Only valid password algorithms should be allowed to set
+	return ""
 }
 
-// Check if a given password(+username) is correct, for a given sha256 hash
-func (state *UserState) correct_sha256(hash, username, password string) bool {
-	comparisonHash := state.HashPassword(username, password)
-	// check that the lengths are equal before calling ConstantTimeCompare
-	if len(comparisonHash) != len(hash) {
-		return false
+// Return the stored hash, or an empty byte slice
+func (state *UserState) stored_hash(username string) []byte {
+	hashString, err := state.PasswordHash(username)
+	if err != nil {
+		return []byte{}
 	}
-	// prevents timing attack
-	return subtle.ConstantTimeCompare([]byte(hash), []byte(comparisonHash)) == 1
-}
-
-// Check if a given password is correct, for a given bcrypt hash
-func correct_bcrypt(hash, password string) bool {
-	// prevents timing attack
-	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
+	return []byte(hashString)
 }
 
 // Check if a password is correct. username is needed because it is part of the hash.
@@ -457,26 +442,25 @@ func (state *UserState) CorrectPassword(username, password string) bool {
 		return false
 	}
 
-	hash, err := state.PasswordHash(username)
-	if err != nil {
+	// Retrieve the stored password hash
+	hash := state.stored_hash(username)
+	if len(hash) == 0 {
 		return false
 	}
 
+	// Check the password with the right password algorithm
 	switch state.passwordAlgo {
 	case "sha256":
-		return state.correct_sha256(hash, username, password)
+		return correct_sha256(hash, state.cookieSecret, username, password)
 	case "bcrypt":
 		return correct_bcrypt(hash, password)
 	case "bcrypt+": // for backwards compatibility with sha256
-		if len(hash) == 32 {
-			if state.correct_sha256(hash, username, password) {
-				return true
-			}
+		if is_sha256(hash) && correct_sha256(hash, state.cookieSecret, username, password) {
+			return true
 		} else {
 			return correct_bcrypt(hash, password)
 		}
 	}
-
 	return false
 }
 
