@@ -58,6 +58,7 @@ func TestPasswordBasic(t *testing.T) {
 
 }
 
+// Check if the functionality for backwards compatible hashing works
 func TestPasswordBackward(t *testing.T) {
 	userstate := NewUserStateSimple()
 	userstate.SetPasswordAlgo("sha256")
@@ -79,6 +80,29 @@ func TestPasswordBackward(t *testing.T) {
 	if !userstate.CorrectPassword("bob", "hunter1") {
 		t.Error("Error, the sha256 password is not correct when checking with bcrypt+")
 	}
+
+	userstate.RemoveUser("bob")
+}
+
+// Check if the functionality for backwards compatible hashing works
+func TestPasswordNotBackward(t *testing.T) {
+	userstate := NewUserStateSimple()
+	userstate.SetPasswordAlgo("bcrypt")
+	userstate.AddUser("bob", "hunter1", "bob@zombo.com")
+	if !userstate.HasUser("bob") {
+		t.Error("Error, user bob should exist")
+	}
+	userstate.SetPasswordAlgo("sha256")
+	if userstate.CorrectPassword("bob", "hunter1") {
+		t.Error("Error, the password is stored as bcrypt, should not be okay with sha256")
+	}
+
+	userstate.SetPasswordAlgo("bcrypt")
+	if !userstate.CorrectPassword("bob", "hunter1") {
+		t.Error("Error, the password should be correct when checking with bcrypt")
+	}
+
+	userstate.RemoveUser("bob")
 }
 
 func TestPasswordAlgoMatching(t *testing.T) {
