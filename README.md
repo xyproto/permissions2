@@ -229,7 +229,13 @@ Password hashing
 ----------------
 
 * "bcrypt" is used by default for hashing passwords. "sha256" is also supported.
-* By default, new password will be bcrypt hashes, but old passwords will be checked with both sha256 and bcrypt, for backwards compatibility. To disable this behavior, and only use bcrypt, set the password hashing algorithm to "bcrypt". Example: `userstate.SetPasswordAlgo("bcrypt")`
+* By default, all new password will be hashed with "bcrypt". Old password hashes will be checked with both sha256 and bcrypt, for backwards compatibility. Only old hashes with the length of a sha256 hash will be checked with sha256. To disable this behavior, and only ever use bcrypt, set the password hashing algorithm to "bcrypt". Example: `userstate.SetPasswordAlgo("bcrypt")`
+
+Coding style
+------------
+
+* log.Fatal or panic should only be used for problems that may occur when starting the application, like not being able to connect to the database. The rest of the functions should return errors instead, so that they can be handled.
+* The code should always be formatted with `go fmt`.
 
 General information
 -------------------
