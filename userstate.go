@@ -30,7 +30,8 @@ type UserState struct {
 	passwordAlgo string                      // The hashing algorithm to utilize default: "bcrypt+" allowed: ("sha256", "bcrypt", "bcrypt+")
 }
 
-// Huge interface for making it possible to depend on different versions of the permission package, or other packages that implement userstates
+// Interface for making it possible to depend on different versions of the permission package, or other packages that implement userstates
+// TODO: Decouple the database backend for permissions3.
 type UserStateKeeper interface {
 	UserRights(req *http.Request) bool
 	HasUser(username string) bool
@@ -73,7 +74,7 @@ type UserStateKeeper interface {
 	SetMinimumConfirmationCodeLength(length int)
 	GenerateUniqueConfirmationCode() (string, error)
 
-	// TODO: Decouple the backend
+	// Related to the database backend
 	Users() *simpleredis.HashMap
 	DatabaseIndex() int
 	Pool() *simpleredis.ConnectionPool
@@ -136,8 +137,8 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 	// Cookies lasts for 24 hours by default. Specified in seconds.
 	state.cookieTime = defaultCookieTime
 
-	// Default password algorithm is "bcrypt+", which is the same as "bcrypt",
-	// but with backwards compatibility for checking sha256 hashes.
+	// Default password hashing algorithm is "bcrypt+", which is the same as
+	// "bcrypt", but with backwards compatibility for checking sha256 hashes.
 	state.passwordAlgo = "bcrypt+" // "bcrypt+", "bcrypt" or "sha256"
 
 	return state
@@ -193,7 +194,7 @@ func (state *UserState) BooleanField(username, fieldname string) bool {
 	return value == "true"
 }
 
-// Attempt to store a boolean value for the given username and fieldname.
+// Store a boolean value for the given username and custom fieldname
 func (state *UserState) SetBooleanField(username, fieldname string, val bool) {
 	strval := "false"
 	if val {
@@ -392,18 +393,19 @@ func (state *UserState) SetCookieTimeout(cookieTime int64) {
 	state.cookieTime = cookieTime
 }
 
-// Get current password algorithm
+// Get current password hashing algorithm
 func (state *UserState) PasswordAlgo() string {
 	return state.passwordAlgo
 }
 
-// Set the password hashing algorithm that should be used
+// Set the password hashing algorithm that should be used.
+// The default is "bcrypt+".
 // Possible values are:
-//    "bcrypt"  -> Store and check passwords with the bcrypt hash.
-//    "sha256"  -> Store and check passwords with the sha256 hash.
-//    "bcrypt+" -> Store passwords with bcrypt, but check with both
-//                 bcrypt and sha256, for backwards compatibility
-//                 with old passwords that has been stored as sha256.
+//    bcrypt  -> Store and check passwords with the bcrypt hash.
+//    sha256  -> Store and check passwords with the sha256 hash.
+//    bcrypt+ -> Store passwords with bcrypt, but check with both
+//               bcrypt and sha256, for backwards compatibility
+//               with old passwords that has been stored as sha256.
 func (state *UserState) SetPasswordAlgo(algo string) error {
 	switch algo {
 	case "sha256", "bcrypt", "bcrypt+":
@@ -414,7 +416,7 @@ func (state *UserState) SetPasswordAlgo(algo string) error {
 	return nil
 }
 
-// Hash the password (the username is needed for salting when using sha256)
+// Hash the password (include the username as well, it may be used for salting)
 func (state *UserState) HashPassword(username, password string) string {
 	switch state.passwordAlgo {
 	case "sha256":
@@ -561,7 +563,7 @@ func (state *UserState) GenerateUniqueConfirmationCode() (string, error) {
 }
 
 // Check that the given username and password are different.
-// Also check if the chosen username only contains letters, numbers and/or underscore.
+// Also check if the chosen username only contains letters, numbers and/or underscore. Use the "CorrectPassword" function for checking of the password is correct.
 func ValidUsernamePassword(username, password string) error {
 	// TODO Use a more international selection of letters?
 	const allowed_letters = "abcdefghijklmnopqrstuvwxyzæøåABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ_0123456789"
