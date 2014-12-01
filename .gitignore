@@ -23,7 +23,8 @@ _testmain.go
 *.exe
 *.test
 
-# Binaries
-example/example
+# Executables for the examples
+examples/negroni/negroni
 examples/martini/martini
 examples/gin/gin
+examples/macaron/macaron

@@ -47,8 +47,7 @@ func main() {
 	// Get the userstate, used in the handlers below
 	userstate := perm.UserState()
 
-	m.Get("/", func(ctx *macaron.Context) string {
-		msg := ""
+	m.Get("/", func(ctx *macaron.Context) (msg string) {
 		msg += fmt.Sprintf("Has user bob: %v\n", userstate.HasUser("bob"))
 		msg += fmt.Sprintf("Logged in on server: %v\n", userstate.IsLoggedIn("bob"))
 		msg += fmt.Sprintf("Is confirmed: %v\n", userstate.IsConfirmed("bob"))
@@ -56,7 +55,7 @@ func main() {
 		msg += fmt.Sprintf("Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(ctx.Req.Request))
 		msg += fmt.Sprintf("Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(ctx.Req.Request))
 		msg += fmt.Sprintln("\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
-		return msg
+		return // msg
 	})
 
 	m.Get("/register", func(ctx *macaron.Context) string {
