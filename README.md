@@ -1,6 +1,6 @@
 #Permissions [![Build Status](https://travis-ci.org/xyproto/permissions2.svg?branch=master)](https://travis-ci.org/xyproto/permissions2) [![GoDoc](https://godoc.org/github.com/xyproto/permissions2?status.svg)](http://godoc.org/github.com/xyproto/permissions2)
 
-Middleware for [Negroni](https://github.com/codegangsta/negroni), for keeping track of users, login states and permissions.
+Middleware for keeping track of users, login states and permissions.
 
 Online API Documentation
 ------------------------
@@ -17,8 +17,7 @@ Features and limitations
 * Supports registration and confirmation via generated confirmation codes.
 * Tries to keep things simple.
 * Only supports "public", "user" and "admin" permissions out of the box, but offers functionality for implementing more fine grained permissions, if so desired.
-* Can be used together with [Martini](https://github.com/go-martini/martini), either directly or by using the [fizz](https://github.com/xyproto/fizz) package.
-* Also works together with [Gin](https://github.com/gin-gonic/gin).
+* Supports Negroni, Martini, Gin and Macaron.
 * May also work with other web-related packages, since the standard http.HandlerFunc is used everywhere.
 * The default permissions can be cleared with the Clear() function.
 
