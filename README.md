@@ -153,41 +153,41 @@ func main() {
 		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
 	})
 
-	m.Get("/register", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/register", func(w http.ResponseWriter) {
 		userstate.AddUser("bob", "hunter1", "bob@zombo.com")
 		fmt.Fprintf(w, "User bob was created: %v\n", userstate.HasUser("bob"))
 	})
 
-	m.Get("/confirm", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/confirm", func(w http.ResponseWriter) {
 		userstate.MarkConfirmed("bob")
 		fmt.Fprintf(w, "User bob was confirmed: %v\n", userstate.IsConfirmed("bob"))
 	})
 
-	m.Get("/remove", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/remove", func(w http.ResponseWriter) {
 		userstate.RemoveUser("bob")
 		fmt.Fprintf(w, "User bob was removed: %v\n", !userstate.HasUser("bob"))
 	})
 
-	m.Get("/login", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/login", func(w http.ResponseWriter) {
 		userstate.Login(w, "bob")
 		fmt.Fprintf(w, "bob is now logged in: %v\n", userstate.IsLoggedIn("bob"))
 	})
 
-	m.Get("/logout", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/logout", func(w http.ResponseWriter) {
 		userstate.Logout("bob")
 		fmt.Fprintf(w, "bob is now logged out: %v\n", !userstate.IsLoggedIn("bob"))
 	})
 
-	m.Get("/makeadmin", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/makeadmin", func(w http.ResponseWriter) {
 		userstate.SetAdminStatus("bob")
 		fmt.Fprintf(w, "bob is now administrator: %v\n", userstate.IsAdmin("bob"))
 	})
 
-	m.Get("/data", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/data", func(w http.ResponseWriter) {
 		fmt.Fprintf(w, "user page that only logged in users must see!")
 	})
 
-	m.Get("/admin", func(w http.ResponseWriter, req *http.Request) {
+	m.Get("/admin", func(w http.ResponseWriter) {
 		fmt.Fprintf(w, "super secret information that only logged in administrators must see!\n\n")
 		if usernames, err := userstate.AllUsernames(); err == nil {
 			fmt.Fprintf(w, "list of all users: "+strings.Join(usernames, ", "))
