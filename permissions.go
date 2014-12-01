@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// TODO: Add custom roles for permissions3
 type Permissions struct {
 	state              *UserState
 	adminPathPrefixes  []string
