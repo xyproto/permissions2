@@ -194,7 +194,6 @@ func main() {
 	})
 
 	// Set up a middleware handler for Martini, with a custom "permission denied" message.
-	// Use the xyproto/fizz middleware for a simpler solution.
 	permissionHandler := func(w http.ResponseWriter, req *http.Request, c martini.Context) {
 		// Check if the user has the right admin/user rights
 		if perm.Rejected(w, req) {
