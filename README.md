@@ -444,8 +444,8 @@ Default permissions
 Password hashing
 ----------------
 
-* "bcrypt" is used by default for hashing passwords. "sha256" is also supported.
-* By default, all new password will be hashed with "bcrypt".
+* bcrypt is used by default for hashing passwords. sha256 is also supported.
+* By default, all new password will be hashed with bcrypt.
 * For backwards compatibility, old password hashes with the length of a sha256 hash will be checked with sha256. To disable this behavior, and only ever use bcrypt, add this line: `userstate.SetPasswordAlgo("bcrypt")`
 
 Coding style
