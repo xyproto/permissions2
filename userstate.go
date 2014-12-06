@@ -31,7 +31,6 @@ type UserState struct {
 }
 
 // Interface for making it possible to depend on different versions of the permission package, or other packages that implement userstates
-// TODO: Decouple the database backend for permissions3.
 type UserStateKeeper interface {
 	UserRights(req *http.Request) bool
 	HasUser(username string) bool
@@ -565,7 +564,6 @@ func (state *UserState) GenerateUniqueConfirmationCode() (string, error) {
 // Check that the given username and password are different.
 // Also check if the chosen username only contains letters, numbers and/or underscore. Use the "CorrectPassword" function for checking of the password is correct.
 func ValidUsernamePassword(username, password string) error {
-	// TODO Use a more international selection of letters?
 	const allowed_letters = "abcdefghijklmnopqrstuvwxyzæøåABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ_0123456789"
 NEXT:
 	for _, letter := range username {

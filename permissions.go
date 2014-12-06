@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// TODO: Add custom roles for permissions3
+// The structure that keeps track of the permissions for various path prefixes
 type Permissions struct {
 	state              *UserState
 	adminPathPrefixes  []string
@@ -151,7 +151,7 @@ func (perm *Permissions) Rejected(w http.ResponseWriter, req *http.Request) bool
 	return reject
 }
 
-// Negroni middleware handler
+// Middleware handler (compatible with Negroni)
 func (perm *Permissions) ServeHTTP(w http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
 	// Check if the user has the right admin/user rights
 	if perm.Rejected(w, req) {
