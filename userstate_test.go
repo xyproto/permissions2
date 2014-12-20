@@ -124,3 +124,18 @@ func TestUserStateKeeper(t *testing.T) {
 	// Check that the userstate qualifies for the UserStateKeeper interface
 	var _ UserStateKeeper = userstate
 }
+
+func TestHostPassword(t *testing.T) {
+	//userstate := NewUserStateWithPassword("localhost", "foobared")
+	userstate := NewUserStateWithPassword("localhost", "")
+
+	userstate.AddUser("bob", "hunter1", "bob@zombo.com")
+	if !userstate.HasUser("bob") {
+		t.Error("Error, user bob should exist")
+	}
+
+	userstate.RemoveUser("bob")
+	if userstate.HasUser("bob") {
+		t.Error("Error, user bob should not exist")
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/xyproto/simpleredis"
@@ -20,14 +21,14 @@ var (
 
 type UserState struct {
 	// see: http://redis.io/topics/data-types
-	users        *simpleredis.HashMap        // Hash map of users, with several different fields per user ("loggedin", "confirmed", "email" etc)
-	usernames    *simpleredis.Set            // A list of all usernames, for easy enumeration
-	unconfirmed  *simpleredis.Set            // A list of unconfirmed usernames, for easy enumeration
-	pool         *simpleredis.ConnectionPool // A connection pool for Redis
-	dbindex      int                         // Redis database index
-	cookieSecret string                      // Secret for storing secure cookies
-	cookieTime   int64                       // How long a cookie should last, in seconds
-	passwordAlgo string                      // The hashing algorithm to utilize default: "bcrypt+" allowed: ("sha256", "bcrypt", "bcrypt+")
+	users             *simpleredis.HashMap        // Hash map of users, with several different fields per user ("loggedin", "confirmed", "email" etc)
+	usernames         *simpleredis.Set            // A list of all usernames, for easy enumeration
+	unconfirmed       *simpleredis.Set            // A list of unconfirmed usernames, for easy enumeration
+	pool              *simpleredis.ConnectionPool // A connection pool for Redis
+	dbindex           int                         // Redis database index
+	cookieSecret      string                      // Secret for storing secure cookies
+	cookieTime        int64                       // How long a cookie should last, in seconds
+	passwordAlgorithm string                      // The hashing algorithm to utilize default: "bcrypt+" allowed: ("sha256", "bcrypt", "bcrypt+")
 }
 
 // Interface for making it possible to depend on different versions of the permission package, or other packages that implement userstates
@@ -63,7 +64,7 @@ type UserStateKeeper interface {
 	CookieTimeout(username string) int64
 	SetCookieTimeout(cookieTime int64)
 	PasswordAlgo() string
-	SetPasswordAlgo(algo string) error
+	SetPasswordAlgo(algorithm string) error
 	HashPassword(username, password string) string
 	CorrectPassword(username, password string) bool
 	AlreadyHasConfirmationCode(confirmationCode string) bool
@@ -88,6 +89,24 @@ func NewUserStateSimple() *UserState {
 	return NewUserState(0, true, defaultRedisServer)
 }
 
+// Same as NewUserStateSimple, but takes a hostname and a password.
+// Use NewUserState for control over the database index and port number.
+func NewUserStateWithPassword(hostname, password string) *UserState {
+	// db index 0, initialize random generator after generating the cookie secret, password
+	if password == "" {
+		if strings.Count(hostname, ":") > 0 {
+			return NewUserState(0, true, hostname)
+		} else {
+			return NewUserState(0, true, hostname+":6379")
+		}
+	}
+	if strings.Count(hostname, ":") > 0 {
+		return NewUserState(0, true, password+"@"+hostname)
+	} else {
+		return NewUserState(0, true, password+"@"+hostname+":6379")
+	}
+}
+
 // Create a new *UserState that can be used for managing users.
 // dbindex is the Redis database index.
 // If randomseed is true, the random number generator will be seeded after generating the cookie secret.
@@ -105,6 +124,7 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 	if err := simpleredis.TestConnectionHost(redisHostPort); err != nil {
 		log.Fatalln(err.Error())
 	}
+
 	// Aquire connection pool
 	pool = simpleredis.NewConnectionPoolHost(redisHostPort)
 
@@ -138,7 +158,12 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 
 	// Default password hashing algorithm is "bcrypt+", which is the same as
 	// "bcrypt", but with backwards compatibility for checking sha256 hashes.
-	state.passwordAlgo = "bcrypt+" // "bcrypt+", "bcrypt" or "sha256"
+	state.passwordAlgorithm = "bcrypt+" // "bcrypt+", "bcrypt" or "sha256"
+
+	if !pool.Ping() {
+		defer pool.Close()
+		log.Fatalf("Error, wrong hostname, port or password. (%s does not reply to PING)\n", redisHostPort)
+	}
 
 	return state
 }
@@ -394,7 +419,7 @@ func (state *UserState) SetCookieTimeout(cookieTime int64) {
 
 // Get current password hashing algorithm
 func (state *UserState) PasswordAlgo() string {
-	return state.passwordAlgo
+	return state.passwordAlgorithm
 }
 
 // Set the password hashing algorithm that should be used.
@@ -405,19 +430,19 @@ func (state *UserState) PasswordAlgo() string {
 //    bcrypt+ -> Store passwords with bcrypt, but check with both
 //               bcrypt and sha256, for backwards compatibility
 //               with old passwords that has been stored as sha256.
-func (state *UserState) SetPasswordAlgo(algo string) error {
-	switch algo {
+func (state *UserState) SetPasswordAlgo(algorithm string) error {
+	switch algorithm {
 	case "sha256", "bcrypt", "bcrypt+":
-		state.passwordAlgo = algo
+		state.passwordAlgorithm = algorithm
 	default:
-		return errors.New("Permissions: " + algo + " is an unsupported encryption algorithm")
+		return errors.New("Permissions: " + algorithm + " is an unsupported encryption algorithm")
 	}
 	return nil
 }
 
 // Hash the password (include the username as well, it may be used for salting)
 func (state *UserState) HashPassword(username, password string) string {
-	switch state.passwordAlgo {
+	switch state.passwordAlgorithm {
 	case "sha256":
 		return string(hash_sha256(state.cookieSecret, username, password))
 	case "bcrypt", "bcrypt+":
@@ -450,7 +475,7 @@ func (state *UserState) CorrectPassword(username, password string) bool {
 	}
 
 	// Check the password with the right password algorithm
-	switch state.passwordAlgo {
+	switch state.passwordAlgorithm {
 	case "sha256":
 		return correct_sha256(hash, state.cookieSecret, username, password)
 	case "bcrypt":
