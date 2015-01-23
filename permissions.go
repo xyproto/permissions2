@@ -1,6 +1,5 @@
+// Middleware for keeping track of users, login states and permissions.
 package permissions
-
-// Middleware handler for handling requests and permissions
 
 import (
 	"net/http"

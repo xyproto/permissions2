@@ -440,6 +440,8 @@ Default permissions
 * These path prefixes has user rights by default: */repo* and */data*
 * These path prefixes are public by default: */*, */login*, */register*, */style*, */img*, */js*, */favicon.ico*, */robots.txt* and */sitemap_index.xml*
 
+The default permissions can be cleared with the Clear() function.
+
 
 Password hashing
 ----------------
@@ -451,8 +453,8 @@ Password hashing
 Coding style
 ------------
 
-* log.Fatal or panic should only be used for problems that may occur when starting the application, like not being able to connect to the database. The rest of the functions should return errors instead, so that they can be handled.
-* The code should always be formatted with `go fmt`.
+* log.Fatal or panic shall only be used for problems that may occur when starting the application, like not being able to connect to the database. The rest of the functions should return errors instead, so that they can be handled.
+* The code shall always be formatted with `go fmt`.
 
 General information
 -------------------
