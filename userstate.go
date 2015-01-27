@@ -340,6 +340,7 @@ func (state *UserState) MarkConfirmed(username string) {
 func (state *UserState) RemoveUser(username string) {
 	state.usernames.Del(username)
 	// Remove additional data as well
+	// TODO: Ideally, remove all keys belonging to the user.
 	state.users.DelKey(username, "loggedin")
 }
 
