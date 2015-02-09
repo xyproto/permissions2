@@ -23,7 +23,7 @@ func main() {
 		// Check if the user has the right admin/user rights
 		if perm.Rejected(c.Writer, c.Request) {
 			// Deny the request, don't call other middleware handlers
-			c.Abort(http.StatusForbidden)
+			c.AbortWithStatus(http.StatusForbidden)
 			fmt.Fprint(c.Writer, "Permission denied!")
 			return
 		}
