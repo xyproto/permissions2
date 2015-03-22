@@ -17,10 +17,10 @@ Features and limitations
 * Does not support SQL databases. For MariaDB/MySQL support, look into [permissionsql](https://github.com/xyproto/permissionsql).
 * Supports registration and confirmation via generated confirmation codes.
 * Tries to keep things simple.
-* Only supports "public", "user" and "admin" permissions out of the box, but offers functionality for implementing more fine grained permissions, if so desired.
+* Only supports *public*, *user* and *admin* permissions out of the box, but offers functionality for implementing more fine grained permissions, if so desired.
+* The default permissions can be cleared with the `Clear()` function.
 * Supports [Negroni](https://github.com/codegangsta/negroni), [Martini](https://github.com/go-martini/martini), [Gin](https://github.com/gin-gonic/gin) and [Macaron](https://github.com/Unknwon/macaron).
 * Should also work with other frameworks, since the standard http.HandlerFunc is used everywhere.
-* The default permissions can be cleared with the Clear() function.
 
 Example for [Negroni](https://github.com/codegangsta/negroni)
 --------------------
@@ -440,7 +440,7 @@ Default permissions
 * These path prefixes has user rights by default: */repo* and */data*
 * These path prefixes are public by default: */*, */login*, */register*, */style*, */img*, */js*, */favicon.ico*, */robots.txt* and */sitemap_index.xml*
 
-The default permissions can be cleared with the Clear() function.
+The default permissions can be cleared with the `Clear()` function.
 
 
 Password hashing
