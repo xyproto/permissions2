@@ -437,7 +437,7 @@ Default permissions
 -------------------
 
 * The */admin* path prefix has admin rights by default.
-* These path prefixes has user rights by default: */repo* and */data*
+* These path prefixes have user rights by default: */repo* and */data*
 * These path prefixes are public by default: */*, */login*, */register*, */style*, */img*, */js*, */favicon.ico*, */robots.txt* and */sitemap_index.xml*
 
 The default permissions can be cleared with the `Clear()` function.
