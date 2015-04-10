@@ -29,6 +29,11 @@ func SecureCookie(req *http.Request, name string, cookieSecret string) (string, 
 
 		parts := strings.SplitN(cookie.Value, "|", 3)
 
+		// fix potential out of range error
+		if len(parts) != 3 {
+			return "", false
+		}
+
 		val := parts[0]
 		timestamp := parts[1]
 		sig := parts[2]
