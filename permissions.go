@@ -1,4 +1,4 @@
-// Middleware for keeping track of users, login states and permissions.
+// Package permissions provides a way to keep track of users, login states and permissions.
 package permissions
 
 import (
