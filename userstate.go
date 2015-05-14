@@ -405,6 +405,12 @@ func (state *UserState) CookieLogin(w http.ResponseWriter, username string) erro
 	return state.SetUsernameCookie(w, username)
 }
 
+// Try to clear the user cookie by setting it to expired.
+// Some browsers *may* be configured to keep cookies even after this.
+func (state *UserState) ClearCookie(w http.ResponseWriter) {
+	ClearCookie(w, "user", "/")
+}
+
 // Convenience function for logging a user out.
 func (state *UserState) Logout(username string) {
 	state.SetLoggedOut(username)

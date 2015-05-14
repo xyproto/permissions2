@@ -70,6 +70,14 @@ func SetCookiePath(w http.ResponseWriter, name, value string, age int64, path st
 	SetHeader(w, "Set-Cookie", cookie.String(), false)
 }
 
+// Clear the given cookie name, with a corresponding path
+// Note that browsers *may* be configured to not delete the cookie.
+func ClearCookie(w http.ResponseWriter, cookieName, cookiePath string) {
+	ignoredContent := "BLUBLU" // random string
+	cookie := fmt.Sprintf("%s=%s; path=%s; expires=Thu, 01 Jan 1970 00:00:00 GMT", cookieName, ignoredContent, cookiePath)
+	SetHeader(w, "Set-Cookie", cookie, true)
+}
+
 // Set a secure cookie with an explicit path.
 // age is the time-to-live, in seconds (0 means forever).
 func SetSecureCookiePath(w http.ResponseWriter, name, val string, age int64, path string, cookieSecret string) {
