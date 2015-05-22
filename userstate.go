@@ -31,9 +31,8 @@ type UserState struct {
 	passwordAlgorithm string                      // The hashing algorithm to utilize default: "bcrypt+" allowed: ("sha256", "bcrypt", "bcrypt+")
 }
 
-// NOTE: Deprecated, will be changed for permissions3, so that
-//       different database backends can be supported.
-// Interface for making it possible to depend on different versions of the permission package, or other packages that implement userstates.
+// NOTE: Deprecated, will be changed for permissions3
+// TODO: Support different database backends
 type UserStateKeeper interface {
 	UserRights(req *http.Request) bool
 	HasUser(username string) bool
@@ -56,11 +55,11 @@ type UserStateKeeper interface {
 	RemoveUser(username string)
 	SetAdminStatus(username string)
 	RemoveAdminStatus(username string)
-	addUserUnchecked(username, passwordHash, email string)
 	AddUser(username, password, email string)
 	SetLoggedIn(username string)
 	SetLoggedOut(username string)
-	Login(w http.ResponseWriter, username string)
+	Login(w http.ResponseWriter, username string) error
+	ClearCookie(w http.ResponseWriter)
 	Logout(username string)
 	Username(req *http.Request) string
 	CookieTimeout(username string) int64
@@ -389,18 +388,9 @@ func (state *UserState) SetLoggedOut(username string) {
 	state.users.Set(username, "loggedin", "false")
 }
 
-// NOTE: Will be changed to return an error for permissions3
 // Convenience function for logging a user in and storing the username in a cookie.
-func (state *UserState) Login(w http.ResponseWriter, username string) {
-	state.SetLoggedIn(username)
-	state.SetUsernameCookie(w, username)
-}
-
-// Same as the Login function, but returns an error.
 // Returns an error if the cookie could not be set.
-// (The Login function was not modified, in order to keep backwards
-// compatibility).
-func (state *UserState) CookieLogin(w http.ResponseWriter, username string) error {
+func (state *UserState) Login(w http.ResponseWriter, username string) error {
 	state.SetLoggedIn(username)
 	return state.SetUsernameCookie(w, username)
 }

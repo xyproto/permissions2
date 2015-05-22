@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+const (
+	// Version number. Stable API within major version numbers.
+	Version = 2.1
+)
+
 // The structure that keeps track of the permissions for various path prefixes
 type Permissions struct {
 	state              *UserState
@@ -15,11 +20,6 @@ type Permissions struct {
 	rootIsPublic       bool
 	denied             http.HandlerFunc
 }
-
-const (
-	// Version number. Stable API within major version numbers.
-	Version = 2.0
-)
 
 // Initialize a Permissions struct with all the default settings.
 // This will also connect to the redis host at localhost:6379.
