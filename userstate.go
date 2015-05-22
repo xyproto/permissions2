@@ -568,3 +568,8 @@ NEXT:
 	}
 	return nil
 }
+
+// Return a struct for creating datastructures with
+func (state *UserState) Creator() pinterface.ICreator {
+	return simpleredis.NewCreator(state.pool, state.dbindex)
+}
