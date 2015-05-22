@@ -1,6 +1,7 @@
 package permissions
 
 import (
+	"github.com/xyproto/pinterface"
 	"testing"
 )
 
@@ -121,8 +122,9 @@ func TestPasswordAlgoMatching(t *testing.T) {
 
 func TestUserStateKeeper(t *testing.T) {
 	userstate := NewUserStateSimple()
-	// Check that the userstate qualifies for the UserStateKeeper interface
-	var _ UserStateKeeper = userstate
+
+	// Check that the userstate qualifies for the IUserState interface
+	var _ pinterface.IUserState = userstate
 }
 
 func TestHostPassword(t *testing.T) {

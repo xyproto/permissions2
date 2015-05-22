@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/xyproto/pinterface"
 	"github.com/xyproto/simpleredis"
 )
 
@@ -29,57 +30,6 @@ type UserState struct {
 	cookieSecret      string                      // Secret for storing secure cookies
 	cookieTime        int64                       // How long a cookie should last, in seconds
 	passwordAlgorithm string                      // The hashing algorithm to utilize default: "bcrypt+" allowed: ("sha256", "bcrypt", "bcrypt+")
-}
-
-// NOTE: Deprecated, will be changed for permissions3
-// TODO: Support different database backends
-type UserStateKeeper interface {
-	UserRights(req *http.Request) bool
-	HasUser(username string) bool
-	BooleanField(username, fieldname string) bool
-	SetBooleanField(username, fieldname string, val bool)
-	IsConfirmed(username string) bool
-	IsLoggedIn(username string) bool
-	AdminRights(req *http.Request) bool
-	IsAdmin(username string) bool
-	UsernameCookie(req *http.Request) (string, error)
-	SetUsernameCookie(w http.ResponseWriter, username string) error
-	AllUsernames() ([]string, error)
-	Email(username string) (string, error)
-	PasswordHash(username string) (string, error)
-	AllUnconfirmedUsernames() ([]string, error)
-	ConfirmationCode(username string) (string, error)
-	AddUnconfirmed(username, confirmationCode string)
-	RemoveUnconfirmed(username string)
-	MarkConfirmed(username string)
-	RemoveUser(username string)
-	SetAdminStatus(username string)
-	RemoveAdminStatus(username string)
-	AddUser(username, password, email string)
-	SetLoggedIn(username string)
-	SetLoggedOut(username string)
-	Login(w http.ResponseWriter, username string) error
-	ClearCookie(w http.ResponseWriter)
-	Logout(username string)
-	Username(req *http.Request) string
-	CookieTimeout(username string) int64
-	SetCookieTimeout(cookieTime int64)
-	PasswordAlgo() string
-	SetPasswordAlgo(algorithm string) error
-	HashPassword(username, password string) string
-	CorrectPassword(username, password string) bool
-	AlreadyHasConfirmationCode(confirmationCode string) bool
-	FindUserByConfirmationCode(confirmationcode string) (string, error)
-	Confirm(username string)
-	ConfirmUserByConfirmationCode(confirmationcode string) error
-	SetMinimumConfirmationCodeLength(length int)
-	GenerateUniqueConfirmationCode() (string, error)
-
-	// Related to the database backend
-	Users() *simpleredis.HashMap
-	DatabaseIndex() int
-	Pool() *simpleredis.ConnectionPool
-	Close()
 }
 
 // Create a new *UserState that can be used for managing users.
@@ -160,12 +110,17 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 	// "bcrypt", but with backwards compatibility for checking sha256 hashes.
 	state.passwordAlgorithm = "bcrypt+" // "bcrypt+", "bcrypt" or "sha256"
 
-	if !pool.Ping() {
+	if pool.Ping() != nil {
 		defer pool.Close()
 		log.Fatalf("Error, wrong hostname, port or password. (%s does not reply to PING)\n", redisHostPort)
 	}
 
 	return state
+}
+
+// Get the Host (for qualifying for the IUserState interface)
+func (state *UserState) Host() pinterface.IHost {
+	return state.pool
 }
 
 // Get the Redis database index.
@@ -316,7 +271,7 @@ func (state *UserState) ConfirmationCode(username string) (string, error) {
 }
 
 // Get the users HashMap.
-func (state *UserState) Users() *simpleredis.HashMap {
+func (state *UserState) Users() pinterface.IHashMap {
 	return state.users
 }
 
