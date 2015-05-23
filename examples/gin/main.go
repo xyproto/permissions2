@@ -51,7 +51,7 @@ func main() {
 		msg += fmt.Sprintf("Username stored in cookies (or blank): %v\n", userstate.Username(c.Request))
 		msg += fmt.Sprintf("Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(c.Request))
 		msg += fmt.Sprintf("Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(c.Request))
-		msg += fmt.Sprintln("\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
+		msg += fmt.Sprintln("\nTry: /register, /confirm, /remove, /login, /logout, /clear, /data, /makeadmin and /admin")
 		c.String(http.StatusOK, msg)
 	})
 
@@ -79,6 +79,11 @@ func main() {
 	g.GET("/logout", func(c *gin.Context) {
 		userstate.Logout("bob")
 		c.String(http.StatusOK, fmt.Sprintf("bob is now logged out: %v\n", !userstate.IsLoggedIn("bob")))
+	})
+
+	g.GET("/clear", func(c *gin.Context) {
+		userstate.ClearCookie(c.Writer)
+		c.String(http.StatusOK, "Clearing cookie")
 	})
 
 	g.GET("/makeadmin", func(c *gin.Context) {
