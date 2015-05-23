@@ -450,16 +450,18 @@ Password hashing
 * By default, all new password will be hashed with bcrypt.
 * For backwards compatibility, old password hashes with the length of a sha256 hash will be checked with sha256. To disable this behavior, and only ever use bcrypt, add this line: `userstate.SetPasswordAlgo("bcrypt")`
 
+
 Coding style
 ------------
 
 * log.Fatal or panic shall only be used for problems that may occur when starting the application, like not being able to connect to the database. The rest of the functions should return errors instead, so that they can be handled.
 * The code shall always be formatted with `go fmt`.
 
+
 General information
 -------------------
 
-* Version: 2.1
+* Version: 2.2
 * License: MIT
 * Alexander F Rødseth
 

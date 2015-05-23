@@ -2,13 +2,14 @@
 package permissions
 
 import (
+	"github.com/xyproto/pinterface"
 	"net/http"
 	"strings"
 )
 
 const (
 	// Version number. Stable API within major version numbers.
-	Version = 2.1
+	Version = 2.2
 )
 
 // The structure that keeps track of the permissions for various path prefixes
@@ -56,7 +57,7 @@ func (perm *Permissions) DenyFunction() http.HandlerFunc {
 }
 
 // Retrieve the UserState struct
-func (perm *Permissions) UserState() *UserState {
+func (perm *Permissions) UserState() pinterface.IUserState {
 	return perm.state
 }
 
