@@ -54,7 +54,7 @@ func main() {
 		msg += fmt.Sprintf("Username stored in cookies (or blank): %v\n", userstate.Username(ctx.Req.Request))
 		msg += fmt.Sprintf("Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(ctx.Req.Request))
 		msg += fmt.Sprintf("Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(ctx.Req.Request))
-		msg += fmt.Sprintln("\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
+		msg += fmt.Sprintln("\nTry: /register, /confirm, /remove, /login, /logout, /makeadmin, /clear, /data and /admin")
 		return // msg
 	})
 
@@ -87,6 +87,11 @@ func main() {
 	m.Get("/makeadmin", func(ctx *macaron.Context) string {
 		userstate.SetAdminStatus("bob")
 		return fmt.Sprintf("bob is now administrator: %v\n", userstate.IsAdmin("bob"))
+	})
+
+	m.Get("/clear", func(ctx *macaron.Context) string {
+		userstate.ClearCookie(ctx.Resp)
+		return "Clearing cookie"
 	})
 
 	m.Get("/data", func(ctx *macaron.Context) string {

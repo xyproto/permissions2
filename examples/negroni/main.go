@@ -29,7 +29,7 @@ func main() {
 		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.Username(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(req))
-		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
+		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /makeadmin, /clear, /data and /admin")
 	})
 
 	mux.HandleFunc("/register", func(w http.ResponseWriter, req *http.Request) {
@@ -60,6 +60,11 @@ func main() {
 	mux.HandleFunc("/makeadmin", func(w http.ResponseWriter, req *http.Request) {
 		userstate.SetAdminStatus("bob")
 		fmt.Fprintf(w, "bob is now administrator: %v\n", userstate.IsAdmin("bob"))
+	})
+
+	mux.HandleFunc("/clear", func(w http.ResponseWriter, req *http.Request) {
+		userstate.ClearCookie(w)
+		fmt.Fprintf(w, "Clearing cookie")
 	})
 
 	mux.HandleFunc("/data", func(w http.ResponseWriter, req *http.Request) {

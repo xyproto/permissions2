@@ -28,7 +28,7 @@ func main() {
 		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.Username(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(req))
-		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
+		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /makeadmin, /clear, /data and /admin")
 	})
 
 	m.Get("/register", func(w http.ResponseWriter) {
@@ -59,6 +59,11 @@ func main() {
 	m.Get("/makeadmin", func(w http.ResponseWriter) {
 		userstate.SetAdminStatus("bob")
 		fmt.Fprintf(w, "bob is now administrator: %v\n", userstate.IsAdmin("bob"))
+	})
+
+	m.Get("/clear", func(w http.ResponseWriter) {
+		userstate.ClearCookie(w)
+		fmt.Fprintf(w, "Clearing cookie")
 	})
 
 	m.Get("/data", func(w http.ResponseWriter) {
