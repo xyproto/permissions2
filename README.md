@@ -56,7 +56,7 @@ func main() {
 		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.Username(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(req))
-		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
+		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /makeadmin, /clear, /data and /admin")
 	})
 
 	mux.HandleFunc("/register", func(w http.ResponseWriter, req *http.Request) {
@@ -87,6 +87,11 @@ func main() {
 	mux.HandleFunc("/makeadmin", func(w http.ResponseWriter, req *http.Request) {
 		userstate.SetAdminStatus("bob")
 		fmt.Fprintf(w, "bob is now administrator: %v\n", userstate.IsAdmin("bob"))
+	})
+
+	mux.HandleFunc("/clear", func(w http.ResponseWriter, req *http.Request) {
+		userstate.ClearCookie(w)
+		fmt.Fprintf(w, "Clearing cookie")
 	})
 
 	mux.HandleFunc("/data", func(w http.ResponseWriter, req *http.Request) {
@@ -149,7 +154,7 @@ func main() {
 		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.Username(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(req))
 		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(req))
-		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
+		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /makeadmin, /clear, /data and /admin")
 	})
 
 	m.Get("/register", func(w http.ResponseWriter) {
@@ -180,6 +185,11 @@ func main() {
 	m.Get("/makeadmin", func(w http.ResponseWriter) {
 		userstate.SetAdminStatus("bob")
 		fmt.Fprintf(w, "bob is now administrator: %v\n", userstate.IsAdmin("bob"))
+	})
+
+	m.Get("/clear", func(w http.ResponseWriter) {
+		userstate.ClearCookie(w)
+		fmt.Fprintf(w, "Clearing cookie")
 	})
 
 	m.Get("/data", func(w http.ResponseWriter) {
@@ -270,7 +280,7 @@ func main() {
 		msg += fmt.Sprintf("Username stored in cookies (or blank): %v\n", userstate.Username(c.Request))
 		msg += fmt.Sprintf("Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(c.Request))
 		msg += fmt.Sprintf("Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(c.Request))
-		msg += fmt.Sprintln("\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
+		msg += fmt.Sprintln("\nTry: /register, /confirm, /remove, /login, /logout, /makeadmin, /clear, /data and /admin")
 		c.String(http.StatusOK, msg)
 	})
 
@@ -303,6 +313,11 @@ func main() {
 	g.GET("/makeadmin", func(c *gin.Context) {
 		userstate.SetAdminStatus("bob")
 		c.String(http.StatusOK, fmt.Sprintf("bob is now administrator: %v\n", userstate.IsAdmin("bob")))
+	})
+
+	g.GET("/clear", func(c *gin.Context) {
+		userstate.ClearCookie(c.Writer)
+		c.String(http.StatusOK, "Clearing cookie")
 	})
 
 	g.GET("/data", func(c *gin.Context) {
@@ -381,7 +396,7 @@ func main() {
 		msg += fmt.Sprintf("Username stored in cookies (or blank): %v\n", userstate.Username(ctx.Req.Request))
 		msg += fmt.Sprintf("Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(ctx.Req.Request))
 		msg += fmt.Sprintf("Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(ctx.Req.Request))
-		msg += fmt.Sprintln("\nTry: /register, /confirm, /remove, /login, /logout, /data, /makeadmin and /admin")
+		msg += fmt.Sprintln("\nTry: /register, /confirm, /remove, /login, /logout, /makeadmin, /clear, /data and /admin")
 		return msg
 	})
 
@@ -414,6 +429,11 @@ func main() {
 	m.Get("/makeadmin", func(ctx *macaron.Context) string {
 		userstate.SetAdminStatus("bob")
 		return fmt.Sprintf("bob is now administrator: %v\n", userstate.IsAdmin("bob"))
+	})
+
+	m.Get("/clear", func(ctx *macaron.Context) string {
+		userstate.ClearCookie(ctx.Resp)
+		return "Clearing cookie"
 	})
 
 	m.Get("/data", func(ctx *macaron.Context) string {
