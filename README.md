@@ -15,6 +15,7 @@ Features and limitations
 * Suitable for running a local Redis server, registering/confirming users and managing public/user/admin pages.
 * Also supports connecting to remote Redis servers.
 * Does not support SQL databases. For MariaDB/MySQL support, look into [permissionsql](https://github.com/xyproto/permissionsql).
+* For Bolt database support, look into [permissionbolt](https://github.com/xyproto/permissionbolt).
 * Supports registration and confirmation via generated confirmation codes.
 * Tries to keep things simple.
 * Only supports *public*, *user* and *admin* permissions out of the box, but offers functionality for implementing more fine grained permissions, if so desired.
@@ -474,7 +475,6 @@ Password hashing
 Coding style
 ------------
 
-* log.Fatal or panic shall only be used for problems that may occur when starting the application, like not being able to connect to the database. The rest of the functions should return errors instead, so that they can be handled.
 * The code shall always be formatted with `go fmt`.
 
 
