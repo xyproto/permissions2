@@ -1,4 +1,4 @@
-// Package permissions provides a way to keep track of users, login states and permissions.
+// Package permissions2 provides a way to keep track of users, login states and permissions.
 package permissions
 
 import (
