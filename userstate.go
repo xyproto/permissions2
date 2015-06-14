@@ -454,6 +454,23 @@ func (state *UserState) RemoveAdminStatus(username string) {
 	state.users.Set(username, "admin", "false")
 }
 
+func (state *UserState) GetToken(username string) (string, error) {
+	return state.users.Get(username, "token")
+}
+
+func (state *UserState) SetToken(username string, token string, expired int64) {
+	state.users.Set(username, "token", token)
+}
+
+func (state *UserState) RemoveToken(username string) {
+	state.users.DelKey(username, "token")
+}
+
+func (state *UserState) SetPassword(username string, passwd string) {
+	passwordHash := state.HashPassword(username, passwd)
+	state.users.Set(username, "password", passwordHash)
+}
+
 // Creates a user from the username and password hash, does not check for rights.
 func (state *UserState) addUserUnchecked(username, passwordHash, email string) {
 	// Add the user
