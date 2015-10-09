@@ -11,17 +11,17 @@ Online API Documentation
 Features and limitations
 ------------------------
 
-* Uses secure cookies and stores user information in a Redis database. 
+* Uses secure cookies and stores user information in a Redis database.
 * Suitable for running a local Redis server, registering/confirming users and managing public/user/admin pages.
 * Also supports connecting to remote Redis servers.
 * Does not support SQL databases. For MariaDB/MySQL support, look into [permissionsql](https://github.com/xyproto/permissionsql).
-* For Bolt database support, look into [permissionbolt](https://github.com/xyproto/permissionbolt).
+* For Bolt database support (no database host needed, uses a file), look into [permissionbolt](https://github.com/xyproto/permissionbolt).
 * Supports registration and confirmation via generated confirmation codes.
 * Tries to keep things simple.
 * Only supports *public*, *user* and *admin* permissions out of the box, but offers functionality for implementing more fine grained permissions, if so desired.
 * The default permissions can be cleared with the `Clear()` function.
 * Supports [Negroni](https://github.com/codegangsta/negroni), [Martini](https://github.com/go-martini/martini), [Gin](https://github.com/gin-gonic/gin), [Macaron](https://github.com/Unknwon/macaron) and [Echo](https://github.com/labstack/echo).
-* Should also work with other frameworks, since the standard http.HandlerFunc is used everywhere.
+* Should also work with other frameworks, since the standard `http.HandlerFunc` is used everywhere.
 
 Example for [Negroni](https://github.com/codegangsta/negroni)
 --------------------
@@ -587,6 +587,12 @@ Password hashing
 * bcrypt is used by default for hashing passwords. sha256 is also supported.
 * By default, all new password will be hashed with bcrypt.
 * For backwards compatibility, old password hashes with the length of a sha256 hash will be checked with sha256. To disable this behavior, and only ever use bcrypt, add this line: `userstate.SetPasswordAlgo("bcrypt")`
+
+
+Passing userstate to functions
+-------------------------------
+
+One way of passing a userstate to a function is to use the [pinterface](https://github.com/xyproto/pinterface) package, like in [this source file](https://github.com/xyproto/algernon/blob/master/luahandler.go) (using `perm pinterface.IPermissions` as the argument). Another method is to use a closure, as in the examples above.
 
 
 Coding style
