@@ -71,9 +71,13 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 		redisHostPort = defaultRedisServer
 	}
 
-	// Test connection
+	// Test connection (the client can do this test before creating a new userstate)
 	if err := simpleredis.TestConnectionHost(redisHostPort); err != nil {
-		log.Fatalln(err.Error())
+		errorMessage := err.Error()
+		if errorMessage == "dial tcp :6379: getsockopt: connection refused" {
+			log.Fatalln("Fatal: Unable to connect to Redis server on port 6379.")
+		}
+		log.Fatalln(errorMessage)
 	}
 
 	// Aquire connection pool
