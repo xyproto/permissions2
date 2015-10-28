@@ -12,7 +12,6 @@ import (
 )
 
 type permissionHandler struct {
-
 	// perm is the Permissions structure that can be used to deny requests.
 	// By using `pinterface.IPermissions` instead of `permissions.Permissions`,
 	// the code is compatible with not only `permissions2`, but also other modules

@@ -570,8 +570,9 @@ func main() {
 }
 ~~~
 
-When only using the Go modules for serving HTTP, the code is a bit more involved
+Example for using only `net/http` for serving
 --------------------
+
 ~~~ go
 package main
 
@@ -587,7 +588,6 @@ import (
 )
 
 type permissionHandler struct {
-
 	// perm is the Permissions structure that can be used to deny requests.
 	// By using `pinterface.IPermissions` instead of `permissions.Permissions`,
 	// the code is compatible with not only `permissions2`, but also other modules
