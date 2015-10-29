@@ -570,8 +570,8 @@ func main() {
 }
 ~~~
 
-Example for using only `net/http` for serving
---------------------
+Example for just `net/http`
+---------------------------
 
 ~~~ go
 package main
