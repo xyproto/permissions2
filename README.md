@@ -588,10 +588,11 @@ import (
 )
 
 type permissionHandler struct {
-	// perm is the Permissions structure that can be used to deny requests.
-	// By using `pinterface.IPermissions` instead of `permissions.Permissions`,
-	// the code is compatible with not only `permissions2`, but also other modules
-	// that uses other database backends, like `permissionbolt`.
+	// perm is a Permissions structure that can be used to deny requests
+	// and aquire the UserState. By using `pinterface.IPermissions` instead
+	// of `permissions.Permissions`, the code is compatible with not only
+	// `permissions2`, but also other modules that uses other database
+	// backends, like `permissionbolt` which uses Bolt.
 	perm pinterface.IPermissions
 
 	// The HTTP multiplexer
@@ -600,16 +601,14 @@ type permissionHandler struct {
 
 // Implement the ServeHTTP method to make a permissionHandler a http.Handler
 func (ph *permissionHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-
 	// Check if the user has the right admin/user rights
 	if ph.perm.Rejected(w, req) {
-		// Deny the request
-		http.Error(w, "Permission denied!", http.StatusForbidden)
+		// Let the user know, by calling the custom "permission denied" function
+		ph.perm.DenyFunction()(w, req)
 		// Reject the request by not calling the next handler below
 		return
 	}
-
-	// Serve the requested if permissions were granted
+	// Serve the requested page if permissions were granted
 	ph.mux.ServeHTTP(w, req)
 }
 
@@ -697,7 +696,7 @@ func main() {
 
 	log.Println("Listening for requests on port 3000")
 
-	// Serve on port 3000
+	// Start listening
 	s.ListenAndServe()
 }
 ~~~

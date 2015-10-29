@@ -22,6 +22,7 @@ _testmain.go
 
 *.exe
 *.test
+*.rdb
 
 # Executables for the examples
 examples/negroni/negroni
@@ -29,3 +30,4 @@ examples/martini/martini
 examples/gin/gin
 examples/macaron/macaron
 examples/echo/echo
+examples/http/http
