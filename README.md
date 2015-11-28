@@ -605,7 +605,7 @@ func (ph *permissionHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	if ph.perm.Rejected(w, req) {
 		// Let the user know, by calling the custom "permission denied" function
 		ph.perm.DenyFunction()(w, req)
-		// Reject the request by not calling the next handler below
+		// Reject the request
 		return
 	}
 	// Serve the requested page if permissions were granted
