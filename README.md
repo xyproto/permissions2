@@ -678,7 +678,7 @@ func main() {
 	// Enable the permissions middleware
 	goji.Use(permissionHandler)
 
-	// Goji listen to port 8000 by default
+	// Goji will listen to port 8000 by default
 	goji.Serve()
 }
 ~~~
