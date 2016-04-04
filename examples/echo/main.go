@@ -36,7 +36,7 @@ func main() {
 	//perm.Clear()
 
 	// Set up a middleware handler for Echo, with a custom "permission denied" message.
-	permissionHandler := echo.MiddlewareFunc(func(next echo.Handler) echo.Handler {
+	permissionHandler := echo.MiddlewareFunc(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return echo.HandlerFunc(func(c echo.Context) error {
 			// Check if the user has the right admin/user rights
 			if perm.Rejected(w(c), req(c)) {
@@ -44,7 +44,7 @@ func main() {
 				return echo.NewHTTPError(http.StatusForbidden, "Permission denied!")
 			}
 			// Continue the chain of middleware
-			return next.Handle(c)
+			return next(c)
 		})
 	})
 
