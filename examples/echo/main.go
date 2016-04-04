@@ -3,9 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
-	"log"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
