@@ -197,5 +197,17 @@ func TestChangePassword(t *testing.T) {
 		t.Error("Error, password is incorrect: should not be hunter1!")
 	}
 
+	// Change the password back to "hunter1"
+	userstate.SetPassword("bob", "hunter1")
+
+	// Check that the password is "hunter1"
+	if !userstate.CorrectPassword("bob", "hunter1") {
+		t.Error("Error, password is incorrect: should be hunter1!")
+	}
+	// Check that the password is not "hunter2"
+	if userstate.CorrectPassword("bob", "hunter2") {
+		t.Error("Error, password is incorrect: should not be hunter2!")
+	}
+
 	userstate.RemoveUser("bob")
 }
