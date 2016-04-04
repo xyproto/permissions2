@@ -111,7 +111,7 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 		log.Fatalln(errorMessage)
 	}
 
-	// Aquire connection pool
+	// Acquire connection pool
 	pool = simpleredis.NewConnectionPoolHost(redisHostPort)
 
 	state := new(UserState)
@@ -177,7 +177,7 @@ func NewUserState2(dbindex int, randomseed bool, redisHostPort string) (*UserSta
 		return nil, err
 	}
 
-	// Aquire connection pool
+	// Acquire connection pool
 	pool = simpleredis.NewConnectionPoolHost(redisHostPort)
 
 	state := new(UserState)
