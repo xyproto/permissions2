@@ -40,7 +40,10 @@ func main() {
 	mux := http.NewServeMux()
 
 	// New permissions middleware
-	perm := permissions.New()
+	perm, err := permissions.New2()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	// Blank slate, no default permissions
 	//perm.Clear()

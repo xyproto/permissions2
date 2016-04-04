@@ -59,6 +59,28 @@ func TestPasswordBasic(t *testing.T) {
 
 }
 
+func TestPasswordBasic2(t *testing.T) {
+	// Test the other method for connecting to Redis
+	userstate, err := NewUserStateSimple2()
+	if err != nil {
+		t.Error("Error, " + err.Error())
+	}
+
+	// Assert that the default password algorithm is "bcrypt+"
+	if userstate.PasswordAlgo() != "bcrypt+" {
+		t.Error("Error, bcrypt+ should be the default password algorithm")
+	}
+
+	// Set password algorithm
+	userstate.SetPasswordAlgo("sha256")
+
+	// Assert that the algorithm is now sha256
+	if userstate.PasswordAlgo() != "sha256" {
+		t.Error("Error, setting password algorithm failed")
+	}
+
+}
+
 // Check if the functionality for backwards compatible hashing works
 func TestPasswordBackward(t *testing.T) {
 	userstate := NewUserStateSimple()

@@ -22,6 +22,7 @@ Features and limitations
 * The default permissions can be cleared with the `Clear()` function.
 * Supports [Negroni](https://github.com/codegangsta/negroni), [Martini](https://github.com/go-martini/martini), [Gin](https://github.com/gin-gonic/gin), [Macaron](https://github.com/Unknwon/macaron), [Echo](https://github.com/labstack/echo),  [Goji](https://github.com/zenazn/goji) and plain `net/http`.
 * Should also work with other frameworks, since the standard `http.HandlerFunc` is used everywhere.
+* The functions ending with `2`, like `NewUserState2` return both a value and an error and is better to use than the alternatives that call `log.Fatal`. The previous functions are kept only for backward compatibility. `permissions3` will not use `log.Fatal`.
 
 
 Example for [Negroni](https://github.com/codegangsta/negroni)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"log"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -15,7 +16,10 @@ func main() {
 	e := echo.New()
 
 	// New permissions middleware
-	perm := permissions.New()
+	perm, err := permissions.New2()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	// Blank slate, no default permissions
 	//perm.Clear()
