@@ -34,6 +34,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+    "log"
 
 	"github.com/codegangsta/negroni"
 	"github.com/xyproto/permissions2"
@@ -44,7 +45,10 @@ func main() {
 	mux := http.NewServeMux()
 
 	// New permissions middleware
-	perm := permissions.New()
+	perm, err := permissions.New2()
+    if err != nil {
+        log.Fatalln(err)
+    }
 
 	// Blank slate, no default permissions
 	//perm.Clear()
@@ -134,6 +138,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+    "log"
 
 	"github.com/go-martini/martini"
 	"github.com/xyproto/permissions2"
@@ -143,7 +148,10 @@ func main() {
 	m := martini.Classic()
 
 	// New permissions middleware
-	perm := permissions.New()
+	perm, err := permissions.New2()
+    if err != nil {
+        log.Fatalln(err)
+    }
 
 	// Blank slate, no default permissions
 	//perm.Clear()
@@ -238,6 +246,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+    "log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xyproto/permissions2"
@@ -247,7 +256,10 @@ func main() {
 	g := gin.New()
 
 	// New permissions middleware
-	perm := permissions.New()
+	perm, err := permissions.New2()
+    if err != nil {
+        log.Fatalln(err)
+    }
 
 	// Blank slate, no default permissions
 	//perm.Clear()
@@ -351,6 +363,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+    "log"
 
 	"github.com/Unknwon/macaron"
 	"github.com/xyproto/permissions2"
@@ -360,7 +373,10 @@ func main() {
 	m := macaron.Classic()
 
 	// New permissions middleware
-	perm := permissions.New()
+	perm, err := permissions.New2()
+    if err != nil {
+        log.Fatalln(err)
+    }
 
 	// Blank slate, no default permissions
 	//perm.Clear()
@@ -467,6 +483,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+    "log"
 
 	"github.com/xyproto/permissions2"
 	"github.com/zenazn/goji"
@@ -474,7 +491,10 @@ import (
 
 func main() {
 	// New permissions middleware
-	perm := permissions.New()
+	perm, err := permissions.New2()
+    if err != nil {
+        log.Fatalln(err)
+    }
 
 	// Blank slate, no default permissions
 	//perm.Clear()
@@ -612,7 +632,10 @@ func main() {
 	mux := http.NewServeMux()
 
 	// New permissions middleware
-	perm := permissions.New()
+	perm, err := permissions.New2()
+    if err != nil {
+        log.Fatalln(err)
+    }
 
 	// Blank slate, no default permissions
 	//perm.Clear()
