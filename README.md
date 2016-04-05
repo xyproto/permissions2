@@ -22,7 +22,6 @@ Features and limitations
 * The default permissions can be cleared with the `Clear()` function.
 * Supports [Negroni](https://github.com/codegangsta/negroni), [Martini](https://github.com/go-martini/martini), [Gin](https://github.com/gin-gonic/gin), [Macaron](https://github.com/Unknwon/macaron), [Echo](https://github.com/labstack/echo),  [Goji](https://github.com/zenazn/goji) and plain `net/http`.
 * Should also work with other frameworks, since the standard `http.HandlerFunc` is used everywhere.
-* The functions ending with `2` returns both a value and an error and is better to use than the alternatives that may call `log.Fatal`. The former is only kept for backward compatibility.
 
 
 Example for [Negroni](https://github.com/codegangsta/negroni)
@@ -883,6 +882,30 @@ Coding style
 
 * The code shall always be formatted with `go fmt`.
 
+
+Setting and getting properties for users
+----------------------------------------
+
+* Setting a property:
+
+```
+username := "bob"
+propertyName := "clever"
+propertyValue := "yes"
+
+userstate.Users().Set(username, propertyName, propertyValue)
+```
+
+* Getting a property:
+
+```
+value, err := userstate.Users().Get(username, propertyName)
+if err != nil {
+    log.Print(err)
+    return err
+}
+fmt.Printf("%s is %s: %s\n", username, propertyName, propertyValue)
+```
 
 General information
 -------------------
