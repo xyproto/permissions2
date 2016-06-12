@@ -899,7 +899,9 @@ userstate.Users().Set(username, propertyName, propertyValue)
 * Getting a property:
 
 ```
-value, err := userstate.Users().Get(username, propertyName)
+username := "bob"
+propertyName := "clever"
+propertyValue, err := userstate.Users().Get(username, propertyName)
 if err != nil {
     log.Print(err)
     return err
