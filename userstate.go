@@ -99,7 +99,7 @@ func NewUserStateWithPassword2(hostname, password string) (*UserState, error) {
 func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState {
 	var pool *simpleredis.ConnectionPool
 
-	// Connnect to the default redis server if redisHostPort is empty
+	// Connect to the default redis server if redisHostPort is empty
 	if redisHostPort == "" {
 		redisHostPort = defaultRedisServer
 	}
@@ -165,7 +165,7 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 func NewUserState2(dbindex int, randomseed bool, redisHostPort string) (*UserState, error) {
 	var pool *simpleredis.ConnectionPool
 
-	// Connnect to the default redis server if redisHostPort is empty
+	// Connect to the default redis server if redisHostPort is empty
 	if redisHostPort == "" {
 		redisHostPort = defaultRedisServer
 	}
@@ -271,7 +271,7 @@ func (state *UserState) HasUser2(username string) (bool, error) {
 	return val, nil
 }
 
-// Return the boolean value for a given username and fieldname.
+// Return the boolean value for a given username and field name.
 // If the user or field is missing, false will be returned.
 // Useful for states where it makes sense that the returned value is not true
 // unless everything is in order.
@@ -354,10 +354,10 @@ func (state *UserState) setUsernameCookieWithFlags(w http.ResponseWriter, userna
 		return errors.New("Can't set cookie for empty username")
 	}
 	if !state.HasUser(username) {
-		return errors.New("Can't store cookie for non-existsing user")
+		return errors.New("Can't store cookie for non-existing user")
 	}
 	// Create a cookie that lasts for a while ("timeout" seconds),
-	// this is the equivivalent of a session for a given username.
+	// this is the equivalent of a session for a given username.
 	cookie.SetSecureCookiePathWithFlags(w, "user", username, state.cookieTime, "/", state.cookieSecret, false, true)
 	return nil
 }
@@ -371,7 +371,7 @@ func (state *UserState) setUsernameCookieWithFlags(w http.ResponseWriter, userna
 func (state *UserState) SetUsernameCookie(w http.ResponseWriter, username string) error {
 	// These cookie flags are set (ref RFC6265)
 	// "secure" is set to false (only allow cookies to be set over HTTPS)
-	// "httponly" is set to true (only allow cookies beeing set/read from the same server)
+	// "httponly" is set to true (only allow cookies being set/read from the same server)
 	return state.setUsernameCookieWithFlags(w, username, false, true)
 }
 
@@ -385,7 +385,7 @@ func (state *UserState) SetUsernameCookie(w http.ResponseWriter, username string
 func (state *UserState) SetUsernameCookieOnlyHTTPS(w http.ResponseWriter, username string) error {
 	// These cookie flags are set (ref RFC6265)
 	// "secure" is set to true (only allow cookies to be set over HTTPS)
-	// "httponly" is set to true (only allow cookies beeing set/read from the same server)
+	// "httponly" is set to true (only allow cookies being set/read from the same server)
 	return state.setUsernameCookieWithFlags(w, username, true, true)
 }
 
@@ -463,7 +463,7 @@ func (state *UserState) addUserUnchecked(username, passwordHash, email string) {
 	state.users.Set(username, "password", passwordHash)
 	state.users.Set(username, "email", email)
 
-	// Addditional fields
+	// Additional fields
 	additionalfields := []string{"loggedin", "confirmed", "admin"}
 	for _, fieldname := range additionalfields {
 		state.users.Set(username, fieldname, "false")
@@ -612,8 +612,8 @@ func (state *UserState) CorrectPassword(username, password string) bool {
 	return false
 }
 
-// Goes through all the confirmationCodes of all the unconfirmed users
-// and checks if this confirmationCode already is in use.
+// AlreadyHasConfirmationCode runs through all confirmation codes of all unconfirmed
+// users and checks if this confirmationCode is already in use.
 func (state *UserState) AlreadyHasConfirmationCode(confirmationCode string) bool {
 	unconfirmedUsernames, err := state.AllUnconfirmedUsernames()
 	if err != nil {
@@ -634,13 +634,13 @@ func (state *UserState) AlreadyHasConfirmationCode(confirmationCode string) bool
 }
 
 // Given a unique confirmation code, find the corresponding username.
-func (state *UserState) FindUserByConfirmationCode(confirmationcode string) (string, error) {
+func (state *UserState) FindUserByConfirmationCode(confirmationCode string) (string, error) {
 	unconfirmedUsernames, err := state.AllUnconfirmedUsernames()
 	if err != nil {
 		return "", errors.New("All existing users are already confirmed.")
 	}
 
-	// Find the username by looking up the confirmationcode on unconfirmed users
+	// Find the username by looking up the confirmationCode on unconfirmed users
 	username := ""
 	for _, aUsername := range unconfirmedUsernames {
 		aConfirmationCode, err := state.ConfirmationCode(aUsername)
@@ -648,7 +648,7 @@ func (state *UserState) FindUserByConfirmationCode(confirmationcode string) (str
 			// If the confirmation code can not be found, just skip this one
 			continue
 		}
-		if confirmationcode == aConfirmationCode {
+		if confirmationCode == aConfirmationCode {
 			// Found the right user
 			username = aUsername
 			break
@@ -677,8 +677,8 @@ func (state *UserState) Confirm(username string) {
 }
 
 // Take a confirmation code and mark the corresponding unconfirmed user as confirmed.
-func (state *UserState) ConfirmUserByConfirmationCode(confirmationcode string) error {
-	username, err := state.FindUserByConfirmationCode(confirmationcode)
+func (state *UserState) ConfirmUserByConfirmationCode(confirmationCode string) error {
+	username, err := state.FindUserByConfirmationCode(confirmationCode)
 	if err != nil {
 		return err
 	}
@@ -728,7 +728,7 @@ NEXT:
 	return nil
 }
 
-// Return a struct for creating datastructures with
+// Return a struct for creating data structures with
 func (state *UserState) Creator() pinterface.ICreator {
 	return simpleredis.NewCreator(state.pool, state.dbindex)
 }
