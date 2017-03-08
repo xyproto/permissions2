@@ -346,7 +346,10 @@ func (state *UserState) UsernameCookie(req *http.Request) (string, error) {
 
 // Store the given username in a cookie in the browser, if possible.
 // The user must exist.
-func (state *UserState) SetUsernameCookie(w http.ResponseWriter, username string) error {
+// There are two cookie flags (ref RFC6265: https://tools.ietf.org/html/rfc6265#section-5.2.5):
+// - secure is for only allowing cookies to be set over HTTPS
+// - httponly is for only allowing cookies for the same server
+func (state *UserState) setUsernameCookieWithFlags(w http.ResponseWriter, username string, secure, httponly bool) error {
 	if username == "" {
 		return errors.New("Can't set cookie for empty username")
 	}
@@ -355,26 +358,53 @@ func (state *UserState) SetUsernameCookie(w http.ResponseWriter, username string
 	}
 	// Create a cookie that lasts for a while ("timeout" seconds),
 	// this is the equivivalent of a session for a given username.
-	cookie.SetSecureCookiePath(w, "user", username, state.cookieTime, "/", state.cookieSecret)
+	cookie.SetSecureCookiePathWithFlags(w, "user", username, state.cookieTime, "/", state.cookieSecret, false, true)
 	return nil
 }
 
-// Get a list of all usernames.
+/*SetUsernameCookie tries to store the given username in a cookie in the browser.
+ *
+ * The user must exist. Returns an error if the username is empty or does not exist.
+ * Returns nil if the cookie has been attempted to be set.
+ * To check if the cookie has actually been set, one must try to read it.
+ */
+func (state *UserState) SetUsernameCookie(w http.ResponseWriter, username string) error {
+	// These cookie flags are set (ref RFC6265)
+	// "secure" is set to false (only allow cookies to be set over HTTPS)
+	// "httponly" is set to true (only allow cookies beeing set/read from the same server)
+	return state.setUsernameCookieWithFlags(w, username, false, true)
+}
+
+/*SetUsernameCookieOnlyHTTPS tries to store the given username in a cookie in the browser.
+ * This function will not set the cookie if over plain HTTP.
+ *
+ * The user must exist. Returns an error if the username is empty or does not exist.
+ * Returns nil if the cookie has been attempted to be set.
+ * To check if the cookie has actually been set, one must try to read it.
+ */
+func (state *UserState) SetUsernameCookieOnlyHTTPS(w http.ResponseWriter, username string) error {
+	// These cookie flags are set (ref RFC6265)
+	// "secure" is set to true (only allow cookies to be set over HTTPS)
+	// "httponly" is set to true (only allow cookies beeing set/read from the same server)
+	return state.setUsernameCookieWithFlags(w, username, true, true)
+}
+
+// AllUsernames retrieves a list of all usernames.
 func (state *UserState) AllUsernames() ([]string, error) {
 	return state.usernames.GetAll()
 }
 
-// Get the email for the given username.
+// Email returns the email address for the given username.
 func (state *UserState) Email(username string) (string, error) {
 	return state.users.Get(username, "email")
 }
 
-// Get the password hash for the given username.
+// PasswordHash returns the password hash for the given username.
 func (state *UserState) PasswordHash(username string) (string, error) {
 	return state.users.Get(username, "password")
 }
 
-// Get all registered users that are not yet confirmed.
+// AllUnconfirmedUsernames returns a list of all registered users that are not yet confirmed.
 func (state *UserState) AllUnconfirmedUsernames() ([]string, error) {
 	return state.unconfirmed.GetAll()
 }
