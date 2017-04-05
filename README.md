@@ -616,12 +616,6 @@ Password hashing
 * For backwards compatibility, old password hashes with the length of a sha256 hash will be checked with sha256. To disable this behavior, and only ever use bcrypt, add this line: `userstate.SetPasswordAlgo("bcrypt")`
 
 
-Passing userstate to functions
--------------------------------
-
-One way of passing a userstate to a function is to use the [pinterface](https://github.com/xyproto/pinterface) package, like in [this source file](https://github.com/xyproto/algernon/blob/master/luahandler.go) (using `perm pinterface.IPermissions` as the argument). Another method is to use a closure, as in the examples above.
-
-
 Coding style
 ------------
 
@@ -657,7 +651,7 @@ fmt.Printf("%s is %s: %s\n", username, propertyName, propertyValue)
 Passing userstate between functions, files and to other Go packages
 -------------------------------------------------------------------
 
-By using the `*pinterface.IUserState` type (from the [pinterface](https://github.com/xyproto/pinterface) package), it is possible to pass user state structs between functions, also in other packages. By using this interface, it is also possible to change the database backend from, for instance, Redis ([permissions2](https://github.com/xyproto/permissions2) to BoltDB ([permissionbolt](https://github.com/xyproto/permissionbolt)), seamlessly.
+By using the `*pinterface.IUserState` type (from the [pinterface](https://github.com/xyproto/pinterface) package), it is possible to pass user state structs between functions, also in other packages. By using this interface, it is also possible to change the database backend from, for instance, Redis ([permissions2](https://github.com/xyproto/permissions2) to BoltDB ([permissionbolt](https://github.com/xyproto/permissionbolt)), seamlessly. Another method is to pass the variable in a closure, as in the examples above.
 
 
 General information
