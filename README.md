@@ -651,7 +651,7 @@ fmt.Printf("%s is %s: %s\n", username, propertyName, propertyValue)
 Passing userstate between functions, files and to other Go packages
 -------------------------------------------------------------------
 
-By using the `*pinterface.IUserState` type (from the [pinterface](https://github.com/xyproto/pinterface) package), it is possible to pass user state structs between functions, also in other packages. By using this interface, it is also possible to change the database backend from, for instance, Redis ([permissions2](https://github.com/xyproto/permissions2) to BoltDB ([permissionbolt](https://github.com/xyproto/permissionbolt)), seamlessly. Another method is to pass the variable in a closure, as in the examples above.
+By using the `*pinterface.IUserState` type (from the [pinterface](https://github.com/xyproto/pinterface) package), it is possible to pass user state structs between functions, also in other packages. By using this interface, it is also possible to change the database backend from, for instance, Redis ([permissions2](https://github.com/xyproto/permissions2)) to BoltDB ([permissionbolt](https://github.com/xyproto/permissionbolt)), seamlessly. Another method is to pass the variable in a closure, as in the examples above.
 
 
 General information
@@ -659,5 +659,5 @@ General information
 
 * Version: 2.2
 * License: MIT
-* Alexander F Rødseth
+* Alexander F Rødseth &lt;xyproto@archlinux.org&gt;
 
