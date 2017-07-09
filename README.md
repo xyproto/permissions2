@@ -16,7 +16,7 @@ Features and limitations
 * Also supports connecting to remote Redis servers.
 * Does not support SQL databases. For MariaDB/MySQL support, look into [permissionsql](https://github.com/xyproto/permissionsql).
 * For Bolt database support (no database host needed, uses a file), look into [permissionbolt](https://github.com/xyproto/permissionbolt).
-* Support for PostgreSQL and the HSTORE feature is available with [pstore](https://github.com/xyproto/pstore).
+* For PostgreSQL database support (using the HSTORE feature), look into [pstore](https://github.com/xyproto/pstore).
 * Supports registration and confirmation via generated confirmation codes.
 * Tries to keep things simple.
 * Only supports *public*, *user* and *admin* permissions out of the box, but offers functionality for implementing more fine grained permissions, if so desired.
@@ -34,7 +34,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-    "log"
+	"log"
 
 	"github.com/urfave/negroni"
 	"github.com/xyproto/permissions2"
@@ -138,7 +138,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-    "log"
+	"log"
 
 	"github.com/go-martini/martini"
 	"github.com/xyproto/permissions2"
