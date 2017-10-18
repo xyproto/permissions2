@@ -24,6 +24,12 @@ Features and limitations
 * Supports [Negroni](https://github.com/urfave/negroni), [Martini](https://github.com/go-martini/martini), [Gin](https://github.com/gin-gonic/gin), [Goji](https://github.com/zenazn/goji) and plain `net/http`.
 * Should also work with other frameworks, since the standard `http.HandlerFunc` is used everywhere.
 
+Requirements
+------------
+
+* Redis >= 2.6.12
+* Go >= 1.5
+
 
 Example for [Negroni](https://github.com/urfave/negroni)
 --------------------
