@@ -664,7 +664,7 @@ Using the `*pinterface.IUserState` type (from the [pinterface](https://github.co
 General information
 -------------------
 
-* Version: 2.4
+* Version: 2.5
 * License: MIT
 * Alexander F Rødseth &lt;xyproto@archlinux.org&gt;
 
