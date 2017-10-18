@@ -454,21 +454,25 @@ func (state *UserState) RemoveAdminStatus(username string) {
 	state.users.Set(username, "admin", "false")
 }
 
+// SetToken sets a token for a user, for a given expiry time
+func (state *UserState) SetToken(username, token string, expire time.Duration) {
+	state.users.SetExpire(username, "token", token, expire)
+}
+
+// GetToken retrieves the token for a user
 func (state *UserState) GetToken(username string) (string, error) {
 	return state.users.Get(username, "token")
 }
 
-func (state *UserState) SetToken(username string, token string, expired int64) {
-	state.users.Set(username, "token", token)
-}
-
+// RemoveToken takes a username and removes the associated token
 func (state *UserState) RemoveToken(username string) {
 	state.users.DelKey(username, "token")
 }
 
-func (state *UserState) SetPassword(username string, passwd string) {
-	passwordHash := state.HashPassword(username, passwd)
-	state.users.Set(username, "password", passwordHash)
+// SetPassword sets the password for a user. The given password string will be hashed.
+// No validation or check of the given password is performed.
+func (state *UserState) SetPassword(username, password string) {
+	state.users.Set(username, "password", state.HashPassword(username, password))
 }
 
 // Creates a user from the username and password hash, does not check for rights.
@@ -584,12 +588,6 @@ func (state *UserState) HashPassword(username, password string) string {
 	}
 	// Only valid password algorithms should be allowed to set
 	return ""
-}
-
-// SetPassword sets the password for a user.
-// Does not take a password hash, will hash the password string.
-func (state *UserState) SetPassword(username, password string) {
-	state.users.Set(username, "password", state.HashPassword(username, password))
 }
 
 // Return the stored hash, or an empty byte slice.
