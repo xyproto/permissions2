@@ -2,14 +2,12 @@
 
 Middleware for keeping track of users, login states and permissions.
 
-Online API Documentation
-------------------------
+## Online API Documentation
 
 [godoc.org](http://godoc.org/github.com/xyproto/permissions2)
 
 
-Features and limitations
-------------------------
+## Features and limitations
 
 * Uses secure cookies and stores user information in a Redis database.
 * Suitable for running a local Redis server, registering/confirming users and managing public/user/admin pages.
@@ -24,15 +22,17 @@ Features and limitations
 * Supports [Negroni](https://github.com/urfave/negroni), [Martini](https://github.com/go-martini/martini), [Gin](https://github.com/gin-gonic/gin), [Goji](https://github.com/zenazn/goji) and plain `net/http`.
 * Should also work with other frameworks, since the standard `http.HandlerFunc` is used everywhere.
 
-Requirements
-------------
+## Requirements
 
 * Redis >= 2.6.12
 * Go >= 1.5
 
+## Examples
 
-Example for [Negroni](https://github.com/urfave/negroni)
---------------------
+There is more information after the examples.
+
+### Example for [Negroni](https://github.com/urfave/negroni)
+
 ~~~ go
 package main
 
@@ -135,8 +135,8 @@ func main() {
 ~~~
 
 
-Example for [Martini](https://github.com/go-martini/martini)
---------------------
+### Example for [Martini](https://github.com/go-martini/martini)
+
 ~~~ go
 package main
 
@@ -242,9 +242,8 @@ func main() {
 }
 ~~~
 
+### Example for [Gin](https://github.com/gin-gonic/gin)
 
-Example for [Gin](https://github.com/gin-gonic/gin)
---------------------
 ~~~ go
 package main
 
@@ -359,8 +358,8 @@ func main() {
 }
 ~~~
 
-Example for [Goji](https://github.com/zenazn/goji)
---------------------
+### Example for [Goji](https://github.com/zenazn/goji)
+
 ~~~ go
 package main
 
@@ -470,8 +469,7 @@ func main() {
 }
 ~~~
 
-Example for just `net/http`
----------------------------
+### Example for just `net/http`
 
 ~~~ go
 package main
@@ -604,33 +602,28 @@ func main() {
 }
 ~~~
 
+## Default permissions
 
-Default permissions
--------------------
-
-* The */admin* path prefix has admin rights by default.
-* These path prefixes have user rights by default: */repo* and */data*
+* Visiting the */admin* path prefix requires the user to be logged in with admin rights, by default.
+* These path prefixes requires the user to be logged in, by default: */repo* and */data*
 * These path prefixes are public by default: */*, */login*, */register*, */style*, */img*, */js*, */favicon.ico*, */robots.txt* and */sitemap_index.xml*
 
 The default permissions can be cleared with the `Clear()` function.
 
 
-Password hashing
-----------------
+## Password hashing
 
 * bcrypt is used by default for hashing passwords. sha256 is also supported.
 * By default, all new password will be hashed with bcrypt.
 * For backwards compatibility, old password hashes with the length of a sha256 hash will be checked with sha256. To disable this behavior, and only ever use bcrypt, add this line: `userstate.SetPasswordAlgo("bcrypt")`
 
 
-Coding style
-------------
+## Coding style
 
 * The code shall always be formatted with `go fmt`.
 
 
-Setting and getting properties for users
-----------------------------------------
+## Setting and getting properties for users
 
 * Setting a property:
 
@@ -655,14 +648,14 @@ if err != nil {
 fmt.Printf("%s is %s: %s\n", username, propertyName, propertyValue)
 ```
 
-Passing userstate between functions, files and to other Go packages
--------------------------------------------------------------------
+## Passing userstate between functions, files and to other Go packages
 
-Using the `*pinterface.IUserState` type (from the [pinterface](https://github.com/xyproto/pinterface) package) makes it possible to pass UserState structs between functions, also in other packages. By using this interface, it is possible to seamlessly change the database backend from, for instance, Redis ([permissions2](https://github.com/xyproto/permissions2)) to BoltDB ([permissionbolt](https://github.com/xyproto/permissionbolt)). [pstore](https://github.com/xyproto/pstore), [permissionsql](https://github.com/xyproto/permissionsql), [permissionbolt](https://github.com/xyproto/permissionbolt) and [permissions2](https://github.com/xyproto/permissions2) are interchangeable.
+Using the `*pinterface.IUserState` type (from the [pinterface](https://github.com/xyproto/pinterface) package) makes it possible to pass UserState structs between functions, also in other packages. By using this interface, it is possible to seamlessly change the database backend from, for instance, Redis ([permissions2](https://github.com/xyproto/permissions2)) to BoltDB ([permissionbolt](https://github.com/xyproto/permissionbolt)).
+
+[pstore](https://github.com/xyproto/pstore), [permissionsql](https://github.com/xyproto/permissionsql), [permissionbolt](https://github.com/xyproto/permissionbolt) and [permissions2](https://github.com/xyproto/permissions2) are interchangeable.
 
 
-General information
--------------------
+## General information
 
 * Version: 2.5
 * License: MIT
