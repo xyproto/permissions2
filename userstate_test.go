@@ -246,3 +246,19 @@ func TestTokens(t *testing.T) {
 	// Remove bob
 	userstate.RemoveUser("bob")
 }
+
+func TestEmail(t *testing.T) {
+	userstate := NewUserStateSimple()
+	userstate.AddUser("bob", "hunter1", "bob@zombo.com")
+	username, err := userstate.HasEmail("bob@zombo.com")
+	if err != nil {
+		t.Error("Error, the e-mail should exist:", err)
+	}
+	if username != "bob" {
+		t.Error("Error, the e-mail address should belong to bob, but belongs to:", username)
+	}
+	username, err = userstate.HasEmail("rob@zombo.com")
+	if err != ErrNotFound { // NOTE: ==
+		t.Error("Error, the e-mail should not exist: " + username)
+	}
+}

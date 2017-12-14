@@ -20,6 +20,7 @@ const (
 
 var (
 	minConfirmationCodeLength = 20 // minimum length of the confirmation code
+	ErrNotFound               = errors.New("Not found")
 )
 
 // Used for dealing with the user state, users and passwords.
@@ -269,6 +270,28 @@ func (state *UserState) HasUser2(username string) (bool, error) {
 		return false, errors.New("Lost connection to Redis?")
 	}
 	return val, nil
+}
+
+// HasEmail finds the user that has a given e-mail address.
+// Returns the username and nil if found or a blank string and ErrNotFound if not.
+func (state *UserState) HasEmail(email string) (string, error) {
+	if email == "" {
+		return "", ErrNotFound
+	}
+	usernames, err := state.AllUsernames()
+	if err != nil {
+		return "", err
+	}
+	for _, username := range usernames {
+		if user_email, err := state.Email(username); err != nil {
+			return "", err
+		} else {
+			if user_email == email {
+				return username, nil
+			}
+		}
+	}
+	return "", ErrNotFound
 }
 
 // Return the boolean value for a given username and field name.
