@@ -19,7 +19,7 @@ Middleware for keeping track of users, login states and permissions.
 * Tries to keep things simple.
 * Only supports *public*, *user* and *admin* permissions out of the box, but offers functionality for implementing more fine grained permissions, if so desired.
 * The default permissions can be cleared with the `Clear()` function.
-* Supports [Negroni](https://github.com/urfave/negroni), [Martini](https://github.com/go-martini/martini), [Gin](https://github.com/gin-gonic/gin), [Goji](https://github.com/zenazn/goji) and plain `net/http`.
+* Supports [Negroni](https://github.com/urfave/negroni), [Iris](https://github.com/kataras/iris), [Martini](https://github.com/go-martini/martini), [Gin](https://github.com/gin-gonic/gin), [Goji](https://github.com/zenazn/goji) and plain `net/http`.
 * Should also work with other frameworks, since the standard `http.HandlerFunc` is used everywhere.
 
 ## Requirements
