@@ -14,7 +14,7 @@ import (
 // PermissionGuard returns an new iris.Handler function that
 // uses the given perm value to reject or accept HTTP requests.
 // `pinterface.IPermissions` is used instead of `*permissions.Permissions`
-// in order to be compatible with noy only `permissions2`, but also
+// in order to be compatible with not only `permissions2`, but also
 // other database backends, like `permissionbolt`, which uses BoltDB.
 func PermissionGuard(perm pinterface.IPermissions) iris.Handler {
 	return func(ctx iris.Context) {
