@@ -775,6 +775,45 @@ Using the `*pinterface.IUserState` type (from the [pinterface](https://github.co
 [pstore](https://github.com/xyproto/pstore), [permissionsql](https://github.com/xyproto/permissionsql), [permissionbolt](https://github.com/xyproto/permissionbolt) and [permissions2](https://github.com/xyproto/permissions2) are interchangeable.
 
 
+## Retrieving the underlying Redis database
+
+Here is a short example application for retrieving the underlying Redis pool and connection:
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/garyburd/redigo/redis"
+	"github.com/xyproto/permissions2"
+)
+
+func main() {
+	perm, err := permissions.New2()
+	if err != nil {
+		fmt.Println("Could not open Redis database")
+		return
+	}
+	ustate := perm.UserState()
+
+	// A bit of checking is needed, since the database backend is interchangeable
+	if pustate, ok := ustate.(*permissions.UserState); ok {
+
+		// Convert from a simpleredis.ConnectionPool to a redis.Pool
+		redisPool := redis.Pool(*pustate.Pool())
+		// Get the Redis connection as well
+		redisConnection := redisPool.Get()
+
+		fmt.Printf("Redis pool: %v (%T)\n", redisPool, redisPool)
+		fmt.Printf("Redis connection: %v (%T)\n", redisConnection, redisConnection)
+	} else {
+		fmt.Println("Not using the Redis database backend")
+	}
+}
+```
+
+
+
 ## General information
 
 * Version: 2.5
