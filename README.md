@@ -159,7 +159,7 @@ func PermissionGuard(perm pinterface.IPermissions) iris.Handler {
 	return func(ctx iris.Context) {
 		// Check if the user has the right admin/user rights
 		if perm.Rejected(ctx.ResponseWriter(), ctx.Request()) {
-			// Stop the request for executing further
+			// Stop the request from executing further
 			ctx.StopExecution()
 			// Let the user know, by calling the custom "permission denied" function
 			perm.DenyFunction()(ctx.ResponseWriter(), ctx.Request())
