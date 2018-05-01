@@ -18,12 +18,14 @@ import (
 // other database backends, like `permissionbolt`, which uses BoltDB.
 func PermissionGuard(perm pinterface.IPermissions) iris.Handler {
 	return func(ctx iris.Context) {
+		w := ctx.ResponseWriter()
+		req := ctx.Request()
 		// Check if the user has the right admin/user rights
-		if perm.Rejected(ctx.ResponseWriter(), ctx.Request()) {
+		if perm.Rejected(w, req) {
 			// Stop the request from executing further
 			ctx.StopExecution()
 			// Let the user know, by calling the custom "permission denied" function
-			perm.DenyFunction()(ctx.ResponseWriter(), ctx.Request())
+			perm.DenyFunction()(w, req)
 			return
 		}
 		// Serve the next handler if permissions were granted
