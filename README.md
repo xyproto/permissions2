@@ -786,7 +786,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/garyburd/redigo/redis"
+    "github.com/gomodule/redigo/redis"
 	"github.com/xyproto/permissions2"
 )
 
