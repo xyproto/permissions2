@@ -799,22 +799,23 @@ func main() {
 	ustate := perm.UserState()
 
 	// A bit of checking is needed, since the database backend is interchangeable
-	if pustate, ok := ustate.(*permissions.UserState); ok {
-
-		// Convert from a simpleredis.ConnectionPool to a redis.Pool
-		redisPool := redis.Pool(*pustate.Pool())
-		// Get the Redis connection as well
-		redisConnection := redisPool.Get()
-
-		fmt.Printf("Redis pool: %v (%T)\n", redisPool, redisPool)
-		fmt.Printf("Redis connection: %v (%T)\n", redisConnection, redisConnection)
-	} else {
+	pustate, ok := ustate.(*permissions.UserState)
+	if !ok {
 		fmt.Println("Not using the Redis database backend")
+		return
 	}
+
+	// Convert from a simpleredis.ConnectionPool to a redis.Pool
+	redisPool := redis.Pool(*pustate.Pool())
+	fmt.Printf("Redis pool: %v (%T)\n", redisPool, redisPool)
+
+	// Get the Redis connection as well
+	redisConnection := redisPool.Get()
+	fmt.Printf("Redis connection: %v (%T)\n", redisConnection, redisConnection)
 }
 ```
 
-
+Note that the `redigo` repository was recently moved to `https://github.com/gomodule/redigo`. The above code will not work if you use the old redigo package.
 
 ## General information
 
