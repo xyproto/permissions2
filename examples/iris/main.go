@@ -11,12 +11,12 @@ import (
 	"github.com/xyproto/pinterface"
 )
 
-// PermissionGuard returns an new iris.Handler function that
+// PermissionMiddleware returns an new iris.Handler function that
 // uses the given perm value to reject or accept HTTP requests.
 // `pinterface.IPermissions` is used instead of `*permissions.Permissions`
 // in order to be compatible with not only `permissions2`, but also
 // other database backends, like `permissionbolt`, which uses BoltDB.
-func PermissionGuard(perm pinterface.IPermissions) iris.Handler {
+func PermissionMiddleware(perm pinterface.IPermissions) iris.Handler {
 	return func(ctx iris.Context) {
 		w := ctx.ResponseWriter()
 		req := ctx.Request()
@@ -36,7 +36,7 @@ func PermissionGuard(perm pinterface.IPermissions) iris.Handler {
 func main() {
 	app := iris.New()
 
-	// New permissions middleware
+	// New permission struct
 	perm, err := permissions.New2()
 	if err != nil {
 		log.Fatalln(err)
@@ -46,19 +46,21 @@ func main() {
 	//perm.Clear()
 
 	// Enable the permissions middleware
-	app.Use(PermissionGuard(perm))
+	app.Use(PermissionMiddleware(perm))
 
 	// Get the userstate, used in the handlers below
 	userstate := perm.UserState()
 
 	app.Get("/", func(ctx iris.Context) {
-		fmt.Fprintf(ctx.ResponseWriter(), "Has user bob: %v\n", userstate.HasUser("bob"))
-		fmt.Fprintf(ctx.ResponseWriter(), "Logged in on server: %v\n", userstate.IsLoggedIn("bob"))
-		fmt.Fprintf(ctx.ResponseWriter(), "Is confirmed: %v\n", userstate.IsConfirmed("bob"))
-		fmt.Fprintf(ctx.ResponseWriter(), "Username stored in cookies (or blank): %v\n", userstate.Username(ctx.Request()))
-		fmt.Fprintf(ctx.ResponseWriter(), "Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(ctx.Request()))
-		fmt.Fprintf(ctx.ResponseWriter(), "Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(ctx.Request()))
-		fmt.Fprintf(ctx.ResponseWriter(), "\nTry: /register, /confirm, /remove, /login, /logout, /makeadmin, /clear, /data and /admin")
+		w := ctx.ResponseWriter()
+		req := ctx.Request()
+		fmt.Fprintf(w, "Has user bob: %v\n", userstate.HasUser("bob"))
+		fmt.Fprintf(w, "Logged in on server: %v\n", userstate.IsLoggedIn("bob"))
+		fmt.Fprintf(w, "Is confirmed: %v\n", userstate.IsConfirmed("bob"))
+		fmt.Fprintf(w, "Username stored in cookies (or blank): %v\n", userstate.Username(req))
+		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *user rights*: %v\n", userstate.UserRights(req))
+		fmt.Fprintf(w, "Current user is logged in, has a valid cookie and *admin rights*: %v\n", userstate.AdminRights(req))
+		fmt.Fprintf(w, "\nTry: /register, /confirm, /remove, /login, /logout, /makeadmin, /clear, /data and /admin")
 	})
 
 	app.Get("/register", func(ctx iris.Context) {
