@@ -20,7 +20,9 @@ const (
 
 var (
 	minConfirmationCodeLength = 20 // minimum length of the confirmation code
-	ErrNotFound               = errors.New("Not found")
+
+	// ErrNotFound is used as an error if not finding what is being searched for
+	ErrNotFound = errors.New("Not found")
 )
 
 // Used for dealing with the user state, users and passwords.

@@ -90,6 +90,8 @@ func TestPasswordBackward(t *testing.T) {
 	if !userstate.HasUser("bob") {
 		t.Error("Error, user bob should exist")
 	}
+	defer userstate.RemoveUser("bob")
+
 	userstate.SetPasswordAlgo("sha256")
 	if !userstate.CorrectPassword("bob", "hunter1") {
 		t.Error("Error, the sha256 password really is correct")
@@ -104,8 +106,6 @@ func TestPasswordBackward(t *testing.T) {
 	if !userstate.CorrectPassword("bob", "hunter1") {
 		t.Error("Error, the sha256 password is not correct when checking with bcrypt+")
 	}
-
-	userstate.RemoveUser("bob")
 }
 
 // Check if the functionality for backwards compatible hashing works
@@ -116,6 +116,8 @@ func TestPasswordNotBackward(t *testing.T) {
 	if !userstate.HasUser("bob") {
 		t.Error("Error, user bob should exist")
 	}
+	defer userstate.RemoveUser("bob")
+
 	userstate.SetPasswordAlgo("sha256")
 	if userstate.CorrectPassword("bob", "hunter1") {
 		t.Error("Error, the password is stored as bcrypt, should not be okay with sha256")
@@ -125,8 +127,6 @@ func TestPasswordNotBackward(t *testing.T) {
 	if !userstate.CorrectPassword("bob", "hunter1") {
 		t.Error("Error, the password should be correct when checking with bcrypt")
 	}
-
-	userstate.RemoveUser("bob")
 }
 
 func TestPasswordAlgoMatching(t *testing.T) {
@@ -173,6 +173,7 @@ func TestChangePassword(t *testing.T) {
 	if !userstate.HasUser("bob") {
 		t.Error("Error, user bob should exist")
 	}
+	defer userstate.RemoveUser("bob")
 
 	// Check that the password is "hunter1"
 	if !userstate.CorrectPassword("bob", "hunter1") {
@@ -209,8 +210,6 @@ func TestChangePassword(t *testing.T) {
 	if userstate.CorrectPassword("bob", "hunter2") {
 		t.Error("Error, password is incorrect: should not be hunter2!")
 	}
-
-	userstate.RemoveUser("bob")
 }
 
 func TestTokens(t *testing.T) {
@@ -221,6 +220,7 @@ func TestTokens(t *testing.T) {
 	if !userstate.HasUser("bob") {
 		t.Error("Error, user bob should exist")
 	}
+	defer userstate.RemoveUser("bob")
 
 	// Set a token that will expire in 200 milliseconds
 	userstate.SetToken("bob", "asdf123", time.Millisecond*200)
@@ -242,9 +242,6 @@ func TestTokens(t *testing.T) {
 	if err == nil || retval != "" {
 		t.Error("Error, token is incorrect: should be gone!")
 	}
-
-	// Remove bob
-	userstate.RemoveUser("bob")
 }
 
 func TestEmail(t *testing.T) {
@@ -258,7 +255,62 @@ func TestEmail(t *testing.T) {
 		t.Error("Error, the e-mail address should belong to bob, but belongs to:", username)
 	}
 	username, err = userstate.HasEmail("rob@zombo.com")
-	if err != ErrNotFound { // NOTE: ==
+	if err != ErrNotFound {
 		t.Error("Error, the e-mail should not exist: " + username)
 	}
+}
+
+func TestTiming(t *testing.T) {
+	userstate := NewUserStateSimple()
+
+	userstate.SetPasswordAlgo("bcrypt")
+	userstate.AddUser("bob", "hunter1", "bob@zombo.com")
+	if !userstate.HasUser("bob") {
+		t.Error("Error, user bob should exist")
+	}
+	defer userstate.RemoveUser("bob")
+
+	// First run takes a bit longer
+	_ = userstate.CorrectPassword("bob", "asdf")
+
+	start1 := time.Now()
+	if !userstate.CorrectPassword("bob", "hunter1") {
+		t.Error("Error, the password IS correct")
+	}
+	elapsed1 := time.Since(start1)
+
+	start2 := time.Now()
+	if userstate.CorrectPassword("bob", "_") {
+		t.Error("Error, the password is NOT correct")
+	}
+	elapsed2 := time.Since(start2)
+
+	start3 := time.Now()
+	if userstate.CorrectPassword("bob", "abc123asfdasdfasfasdfqwertyqwertyqwerty") {
+		t.Error("Error, the password is NOT correct")
+	}
+	elapsed3 := time.Since(start3)
+
+	start4 := time.Now()
+	if userstate.CorrectPassword("bob", "abc123asfdasdfasfasdfqwertyqwertyqwertyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy") {
+		t.Error("Error, the password is NOT correct")
+	}
+	elapsed4 := time.Since(start4)
+
+	// The tolerance is +- 1/30th of the first elapsed time
+	base_min := elapsed1 - time.Duration(elapsed1 / 30)
+	base_max := elapsed1 + time.Duration(elapsed1 / 30)
+
+	if elapsed2 < base_min || elapsed2 > base_max {
+		t.Error("Checking passwords of different lengths should not take much longer or shorter")
+	}
+
+	if elapsed3 < base_min || elapsed3 > base_max {
+		t.Error("Checking passwords of different lengths should not take much longer or shorter")
+	}
+
+	if elapsed4 < base_min || elapsed4 > base_max {
+		t.Error("Checking passwords of different lengths should not take much longer or shorter")
+	}
+	//fmt.Println(base_min, base_max, elapsed1, elapsed2, elapsed3, elapsed4)
 }

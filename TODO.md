@@ -4,11 +4,10 @@ TODO
 Priority
 --------
 
-- [ ] Write tests for timing attacks (the way it is currently done should be safe, but write tests to be sure, now and for future versions).
 - [ ] Document how to add a custom role (like admin/user/public).
 
-For the next version
---------------------
+For the next major version
+--------------------------
 
 - [ ] Let `HashPassword` return an error instead of panic if bcrypt should fail.
 - [ ] Let `NewUserState` return an error instead of the user having to check the Redis connection first.
