@@ -97,9 +97,9 @@ func rt2id(rt reflect.Type) uintptr {
 	return uintptr(((*unsafeIntf)(unsafe.Pointer(&rt))).word)
 }
 
-func rv2rtid(rv reflect.Value) uintptr {
-	return uintptr((*unsafeReflectValue)(unsafe.Pointer(&rv)).typ)
-}
+// func rv2rtid(rv reflect.Value) uintptr {
+// 	return uintptr((*unsafeReflectValue)(unsafe.Pointer(&rv)).typ)
+// }
 
 func i2rtid(i interface{}) uintptr {
 	return uintptr(((*unsafeIntf)(unsafe.Pointer(&i))).typ)
@@ -184,7 +184,7 @@ func isEmptyValue(v reflect.Value, tinfos *TypeInfos, deref, checkStruct bool) b
 // We now just atomically store and load the pointer to the value directly.
 
 type atomicTypeInfoSlice struct { // expected to be 2 words
-	l int            // length of the data array (must be first in struct, for 64-bit alignment necessary for 386)
+	l int            // length of data array (must be first in struct, for 64-bit alignment in i386)
 	v unsafe.Pointer // data array - Pointer (not uintptr) to maintain GC reference
 }
 
@@ -201,6 +201,21 @@ func (x *atomicTypeInfoSlice) store(p []rtid2ti) {
 	s := (*unsafeSlice)(unsafe.Pointer(&p))
 	xp := unsafe.Pointer(x)
 	atomic.StorePointer(&xp, unsafe.Pointer(&atomicTypeInfoSlice{l: s.Len, v: s.Data}))
+}
+
+// --------------------------
+type atomicClsErr struct {
+	v clsErr
+}
+
+func (x *atomicClsErr) load() clsErr {
+	xp := unsafe.Pointer(&x.v)
+	return *(*clsErr)(atomic.LoadPointer(&xp))
+}
+
+func (x *atomicClsErr) store(p clsErr) {
+	xp := unsafe.Pointer(&x.v)
+	atomic.StorePointer(&xp, unsafe.Pointer(&p))
 }
 
 // --------------------------
@@ -307,7 +322,7 @@ func (e *Encoder) kTime(f *codecFnInfo, rv reflect.Value) {
 
 func (e *Encoder) kString(f *codecFnInfo, rv reflect.Value) {
 	v := (*unsafeReflectValue)(unsafe.Pointer(&rv))
-	e.e.EncodeString(cUTF8, *(*string)(v.ptr))
+	e.e.EncodeStringEnc(cUTF8, *(*string)(v.ptr))
 }
 
 func (e *Encoder) kFloat64(f *codecFnInfo, rv reflect.Value) {

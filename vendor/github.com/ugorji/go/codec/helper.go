@@ -135,17 +135,29 @@ const (
 	wordSizeBits = 32 << (^uint(0) >> 63) // strconv.IntSize
 	wordSize     = wordSizeBits / 8
 
-	maxLevelsEmbedding = 14 // use this, so structFieldInfo fits into 8 bytes
+	// so structFieldInfo fits into 8 bytes
+	maxLevelsEmbedding = 14
+
+	// finalizers are used? to Close Encoder/Decoder when they are GC'ed
+	// so that their pooled resources are returned.
+	//
+	// Note that calling SetFinalizer is always expensive,
+	// as code must be run on the systemstack even for SetFinalizer(t, nil).
+	//
+	// We document that folks SHOULD call Close() when done, or they can
+	// explicitly call SetFinalizer themselves e.g.
+	//    runtime.SetFinalizer(e, (*Encoder).Close)
+	//    runtime.SetFinalizer(d, (*Decoder).Close)
+	useFinalizers          = false
+	removeFinalizerOnClose = false
 )
 
-var (
-	oneByteArr    = [1]byte{0}
-	zeroByteSlice = oneByteArr[:0:0]
-)
+var oneByteArr [1]byte
+var zeroByteSlice = oneByteArr[:0:0]
 
 var codecgen bool
 
-var refBitset bitset32
+var refBitset bitset256
 var pool pooler
 var panicv panicHdl
 
@@ -158,15 +170,31 @@ func init() {
 	refBitset.set(byte(reflect.Chan))
 }
 
+type clsErr struct {
+	closed    bool  // is it closed?
+	errClosed error // error on closing
+}
+
+// type entryType uint8
+
+// const (
+// 	entryTypeBytes entryType = iota // make this 0, so a comparison is cheap
+// 	entryTypeIo
+// 	entryTypeBufio
+// 	entryTypeUnset = 255
+// )
+
 type charEncoding uint8
 
 const (
-	cRAW charEncoding = iota
+	_ charEncoding = iota // make 0 unset
 	cUTF8
 	cUTF16LE
 	cUTF16BE
 	cUTF32LE
 	cUTF32BE
+	// Deprecated: not a true char encoding value
+	cRAW charEncoding = 255
 )
 
 // valueType is the stream type
@@ -373,7 +401,7 @@ var (
 	intBitsize  = uint8(intTyp.Bits())
 	uintBitsize = uint8(uintTyp.Bits())
 
-	bsAll0x00 = []byte{0, 0, 0, 0, 0, 0, 0, 0}
+	// bsAll0x00 = []byte{0, 0, 0, 0, 0, 0, 0, 0}
 	bsAll0xff = []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
 
 	chkOvf checkOverflow
@@ -418,6 +446,13 @@ var immutableKindsSet = [32]bool{
 // Any type which implements Selfer will be able to encode or decode itself.
 // Consequently, during (en|de)code, this takes precedence over
 // (text|binary)(M|Unm)arshal or extension support.
+//
+// By definition, it is not allowed for a Selfer to directly call Encode or Decode on itself.
+// If that is done, Encode/Decode will rightfully fail with a Stack Overflow style error.
+// For example, the snippet below will cause such an error.
+//     type testSelferRecur struct{}
+//     func (s *testSelferRecur) CodecEncodeSelf(e *Encoder) { e.MustEncode(s) }
+//     func (s *testSelferRecur) CodecDecodeSelf(d *Decoder) { d.MustDecode(s) }
 //
 // Note: *the first set of bytes of any value MUST NOT represent nil in the format*.
 // This is because, during each decode, we first check the the next set of bytes
@@ -501,6 +536,23 @@ type BasicHandle struct {
 	// (for Cbor and Msgpack), where time.Time was not a builtin supported type.
 	TimeNotBuiltin bool
 
+	// DoNotClose configures whether Close() is implicitly called after an encode or
+	// decode call.
+	//
+	// If you will hold onto an Encoder or Decoder for re-use, by calling Reset(...)
+	// on it, then you do not want it to be implicitly closed after each Encode/Decode call.
+	// Doing so will unnecessarily return resources to the shared pool, only for you to
+	// grab them right after again to do another Encode/Decode call.
+	//
+	// Instead, you configure DoNotClose=true, and you explicitly call Close() when
+	// you are truly done.
+	//
+	// As an alternative, you can explicitly set a finalizer - so its resources
+	// are returned to the shared pool before it is garbage-collected. Do it as below:
+	//    runtime.SetFinalizer(e, (*Encoder).Close)
+	//    runtime.SetFinalizer(d, (*Decoder).Close)
+	DoNotClose bool
+
 	// ---- cache line
 
 	DecodeOptions
@@ -523,11 +575,18 @@ func (x *BasicHandle) getTypeInfo(rtid uintptr, rt reflect.Type) (pti *typeInfo)
 	return x.TypeInfos.get(rtid, rt)
 }
 
-// Handle is the interface for a specific encoding format.
+// Handle defines a specific encoding format. It also stores any runtime state
+// used during an Encoding or Decoding session e.g. stored state about Types, etc.
 //
-// Typically, a Handle is pre-configured before first time use,
-// and not modified while in use. Such a pre-configured Handle
-// is safe for concurrent access.
+// Once a handle is configured, it can be shared across multiple Encoders and Decoders.
+//
+// Note that a Handle is NOT safe for concurrent modification.
+// Consequently, do not modify it after it is configured if shared among
+// multiple Encoders and Decoders in different goroutines.
+//
+// Consequently, the typical usage model is that a Handle is pre-configured
+// before first time use, and not modified while in use.
+// Such a pre-configured Handle is safe for concurrent access.
 type Handle interface {
 	Name() string
 	getBasicHandle() *BasicHandle
@@ -686,7 +745,7 @@ func (noElemSeparators) recreateEncDriver(e encDriver) (v bool) { return }
 // Users must already slice the x completely, because we will not reslice.
 type bigenHelper struct {
 	x []byte // must be correctly sliced to appropriate len. slicing is a cost.
-	w encWriter
+	w *encWriterSwitch
 }
 
 func (z bigenHelper) writeUint16(v uint16) {
@@ -962,17 +1021,9 @@ func (si *structFieldInfo) parseTag(stag string) {
 
 type sfiSortedByEncName []*structFieldInfo
 
-func (p sfiSortedByEncName) Len() int {
-	return len(p)
-}
-
-func (p sfiSortedByEncName) Less(i, j int) bool {
-	return p[i].encName < p[j].encName
-}
-
-func (p sfiSortedByEncName) Swap(i, j int) {
-	p[i], p[j] = p[j], p[i]
-}
+func (p sfiSortedByEncName) Len() int           { return len(p) }
+func (p sfiSortedByEncName) Less(i, j int) bool { return p[uint(i)].encName < p[uint(j)].encName }
+func (p sfiSortedByEncName) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 const structFieldNodeNumToCache = 4
 
@@ -1142,7 +1193,7 @@ func (ti *typeInfo) isFlag(f typeInfoFlag) bool {
 func (ti *typeInfo) indexForEncName(name []byte) (index int16) {
 	var sn []byte
 	if len(name)+2 <= 32 {
-		var buf [32]byte // should not escape
+		var buf [32]byte // should not escape to heap
 		sn = buf[:len(name)+2]
 	} else {
 		sn = make([]byte, len(name)+2)
@@ -1194,32 +1245,38 @@ func (x *TypeInfos) structTag(t reflect.StructTag) (s string) {
 	return
 }
 
-func (x *TypeInfos) find(s []rtid2ti, rtid uintptr) (idx int, ti *typeInfo) {
+func (x *TypeInfos) find(s []rtid2ti, rtid uintptr) (i uint, ti *typeInfo) {
 	// binary search. adapted from sort/search.go.
+	// Note: we use goto (instead of for loop) so this can be inlined.
+
 	// if sp == nil {
 	// 	return -1, nil
 	// }
 	// s := *sp
-	h, i, j := 0, 0, len(s)
-	for i < j {
+
+	// h, i, j := 0, 0, len(s)
+	var h uint // var h, i uint
+	var j = uint(len(s))
+LOOP:
+	if i < j {
 		h = i + (j-i)/2
 		if s[h].rtid < rtid {
 			i = h + 1
 		} else {
 			j = h
 		}
+		goto LOOP
 	}
-	if i < len(s) && s[i].rtid == rtid {
-		return i, s[i].ti
+	if i < uint(len(s)) && s[i].rtid == rtid {
+		ti = s[i].ti
 	}
-	return i, nil
+	return
 }
 
 func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 	sp := x.infos.load()
-	var idx int
 	if sp != nil {
-		idx, pti = x.find(sp, rtid)
+		_, pti = x.find(sp, rtid)
 		if pti != nil {
 			return
 		}
@@ -1304,6 +1361,7 @@ func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 		vs := []rtid2ti{{rtid, pti}}
 		x.infos.store(vs)
 	} else {
+		var idx uint
 		idx, pti = x.find(sp, rtid)
 		if pti == nil {
 			pti = &ti
@@ -1429,7 +1487,7 @@ LOOP:
 			si.encName = f.Name
 		}
 		si.encNameAsciiAlphaNum = true
-		for i := len(si.encName) - 1; i >= 0; i-- {
+		for i := len(si.encName) - 1; i >= 0; i-- { // bounds-check elimination
 			b := si.encName[i]
 			if (b >= '0' && b <= '9') || (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') {
 				continue
@@ -1665,7 +1723,9 @@ func panicValToErr(h errDecorator, v interface{}, err *error) {
 }
 
 func isImmutableKind(k reflect.Kind) (v bool) {
-	return immutableKindsSet[k]
+	// return immutableKindsSet[k]
+	// since we know reflect.Kind is in range 0..31, then use the k%32 == k constraint
+	return immutableKindsSet[k%reflect.Kind(len(immutableKindsSet))] // bounds-check-elimination
 }
 
 // ----
@@ -1717,6 +1777,7 @@ func (c *codecFner) reset(hh Handle) {
 	if !hhSame {
 		// c.hh = hh
 		c.h, bh = bh, c.h // swap both
+		_ = bh
 		_, c.js = hh.(*JsonHandle)
 		c.be = hh.isBinary()
 		if len(c.s) > 0 {
@@ -1954,7 +2015,7 @@ func (d *codecFnPooler) cfer() *codecFner {
 	return d.cf
 }
 
-func (d *codecFnPooler) alwaysAtEnd() {
+func (d *codecFnPooler) end() {
 	if d.cf != nil {
 		d.cfp.Put(d.cf)
 		d.cf, d.cfp = nil, nil
@@ -2074,34 +2135,34 @@ type stringSlice []string
 // type bytesSlice [][]byte
 
 func (p intSlice) Len() int           { return len(p) }
-func (p intSlice) Less(i, j int) bool { return p[i] < p[j] }
-func (p intSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p intSlice) Less(i, j int) bool { return p[uint(i)] < p[uint(j)] }
+func (p intSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p uintSlice) Len() int           { return len(p) }
-func (p uintSlice) Less(i, j int) bool { return p[i] < p[j] }
-func (p uintSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p uintSlice) Less(i, j int) bool { return p[uint(i)] < p[uint(j)] }
+func (p uintSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 // func (p uintptrSlice) Len() int           { return len(p) }
-// func (p uintptrSlice) Less(i, j int) bool { return p[i] < p[j] }
-// func (p uintptrSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+// func (p uintptrSlice) Less(i, j int) bool { return p[uint(i)] < p[uint(j)] }
+// func (p uintptrSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p floatSlice) Len() int { return len(p) }
 func (p floatSlice) Less(i, j int) bool {
-	return p[i] < p[j] || isNaN(p[i]) && !isNaN(p[j])
+	return p[uint(i)] < p[uint(j)] || isNaN(p[uint(i)]) && !isNaN(p[uint(j)])
 }
-func (p floatSlice) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p floatSlice) Swap(i, j int) { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p stringSlice) Len() int           { return len(p) }
-func (p stringSlice) Less(i, j int) bool { return p[i] < p[j] }
-func (p stringSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p stringSlice) Less(i, j int) bool { return p[uint(i)] < p[uint(j)] }
+func (p stringSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 // func (p bytesSlice) Len() int           { return len(p) }
-// func (p bytesSlice) Less(i, j int) bool { return bytes.Compare(p[i], p[j]) == -1 }
-// func (p bytesSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+// func (p bytesSlice) Less(i, j int) bool { return bytes.Compare(p[uint(i)], p[uint(j)]) == -1 }
+// func (p bytesSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p boolSlice) Len() int           { return len(p) }
-func (p boolSlice) Less(i, j int) bool { return !p[i] && p[j] }
-func (p boolSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p boolSlice) Less(i, j int) bool { return !p[uint(i)] && p[uint(j)] }
+func (p boolSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 // ---------------------
 
@@ -2147,34 +2208,34 @@ type timeRv struct {
 type timeRvSlice []timeRv
 
 func (p intRvSlice) Len() int           { return len(p) }
-func (p intRvSlice) Less(i, j int) bool { return p[i].v < p[j].v }
-func (p intRvSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p intRvSlice) Less(i, j int) bool { return p[uint(i)].v < p[uint(j)].v }
+func (p intRvSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p uintRvSlice) Len() int           { return len(p) }
-func (p uintRvSlice) Less(i, j int) bool { return p[i].v < p[j].v }
-func (p uintRvSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p uintRvSlice) Less(i, j int) bool { return p[uint(i)].v < p[uint(j)].v }
+func (p uintRvSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p floatRvSlice) Len() int { return len(p) }
 func (p floatRvSlice) Less(i, j int) bool {
-	return p[i].v < p[j].v || isNaN(p[i].v) && !isNaN(p[j].v)
+	return p[uint(i)].v < p[uint(j)].v || isNaN(p[uint(i)].v) && !isNaN(p[uint(j)].v)
 }
-func (p floatRvSlice) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p floatRvSlice) Swap(i, j int) { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p stringRvSlice) Len() int           { return len(p) }
-func (p stringRvSlice) Less(i, j int) bool { return p[i].v < p[j].v }
-func (p stringRvSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p stringRvSlice) Less(i, j int) bool { return p[uint(i)].v < p[uint(j)].v }
+func (p stringRvSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p bytesRvSlice) Len() int           { return len(p) }
-func (p bytesRvSlice) Less(i, j int) bool { return bytes.Compare(p[i].v, p[j].v) == -1 }
-func (p bytesRvSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p bytesRvSlice) Less(i, j int) bool { return bytes.Compare(p[uint(i)].v, p[uint(j)].v) == -1 }
+func (p bytesRvSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p boolRvSlice) Len() int           { return len(p) }
-func (p boolRvSlice) Less(i, j int) bool { return !p[i].v && p[j].v }
-func (p boolRvSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p boolRvSlice) Less(i, j int) bool { return !p[uint(i)].v && p[uint(j)].v }
+func (p boolRvSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 func (p timeRvSlice) Len() int           { return len(p) }
-func (p timeRvSlice) Less(i, j int) bool { return p[i].v.Before(p[j].v) }
-func (p timeRvSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p timeRvSlice) Less(i, j int) bool { return p[uint(i)].v.Before(p[uint(j)].v) }
+func (p timeRvSlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 // -----------------
 
@@ -2186,8 +2247,8 @@ type bytesI struct {
 type bytesISlice []bytesI
 
 func (p bytesISlice) Len() int           { return len(p) }
-func (p bytesISlice) Less(i, j int) bool { return bytes.Compare(p[i].v, p[j].v) == -1 }
-func (p bytesISlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p bytesISlice) Less(i, j int) bool { return bytes.Compare(p[uint(i)].v, p[uint(j)].v) == -1 }
+func (p bytesISlice) Swap(i, j int)      { p[uint(i)], p[uint(j)] = p[uint(j)], p[uint(i)] }
 
 // -----------------
 
@@ -2261,7 +2322,12 @@ func (s *set) remove(v uintptr) (exists bool) {
 
 // bitset types are better than [256]bool, because they permit the whole
 // bitset array being on a single cache line and use less memory.
-
+//
+// Also, since pos is a byte (0-255), there's no bounds checks on indexing (cheap).
+//
+// We previously had bitset128 [16]byte, and bitset32 [4]byte, but those introduces
+// bounds checking, so we discarded them, and everyone uses bitset256.
+//
 // given x > 0 and n > 0 and x is exactly 2^n, then pos/x === pos>>n AND pos%x === pos&(x-1).
 // consequently, pos/32 === pos>>5, pos/16 === pos>>4, pos/8 === pos>>3, pos%8 == pos&7
 
@@ -2270,40 +2336,16 @@ type bitset256 [32]byte
 func (x *bitset256) isset(pos byte) bool {
 	return x[pos>>3]&(1<<(pos&7)) != 0
 }
-func (x *bitset256) issetv(pos byte) byte {
-	return x[pos>>3] & (1 << (pos & 7))
-}
+
+// func (x *bitset256) issetv(pos byte) byte {
+// 	return x[pos>>3] & (1 << (pos & 7))
+// }
+
 func (x *bitset256) set(pos byte) {
 	x[pos>>3] |= (1 << (pos & 7))
 }
 
 // func (x *bitset256) unset(pos byte) {
-// 	x[pos>>3] &^= (1 << (pos & 7))
-// }
-
-type bitset128 [16]byte
-
-func (x *bitset128) isset(pos byte) bool {
-	return x[pos>>3]&(1<<(pos&7)) != 0
-}
-func (x *bitset128) set(pos byte) {
-	x[pos>>3] |= (1 << (pos & 7))
-}
-
-// func (x *bitset128) unset(pos byte) {
-// 	x[pos>>3] &^= (1 << (pos & 7))
-// }
-
-type bitset32 [4]byte
-
-func (x *bitset32) isset(pos byte) bool {
-	return x[pos>>3]&(1<<(pos&7)) != 0
-}
-func (x *bitset32) set(pos byte) {
-	x[pos>>3] |= (1 << (pos & 7))
-}
-
-// func (x *bitset32) unset(pos byte) {
 // 	x[pos>>3] &^= (1 << (pos & 7))
 // }
 
@@ -2326,20 +2368,35 @@ func (x *bitset32) set(pos byte) {
 // ------------
 
 type pooler struct {
-	dn                                          sync.Pool // for decNaked
-	cfn                                         sync.Pool // for codecFner
-	tiload                                      sync.Pool
+	// function-scoped pooled resources
+	tiload                                      sync.Pool // for type info loading
 	strRv8, strRv16, strRv32, strRv64, strRv128 sync.Pool // for stringRV
+
+	// lifetime-scoped pooled resources
+	dn                                 sync.Pool // for decNaked
+	cfn                                sync.Pool // for codecFner
+	buf1k, buf2k, buf4k, buf8k, buf16k sync.Pool // for [N]byte
 }
 
 func (p *pooler) init() {
+	// function-scoped pooled resources
+	p.tiload.New = func() interface{} { return new(typeInfoLoadArray) }
+
 	p.strRv8.New = func() interface{} { return new([8]sfiRv) }
 	p.strRv16.New = func() interface{} { return new([16]sfiRv) }
 	p.strRv32.New = func() interface{} { return new([32]sfiRv) }
 	p.strRv64.New = func() interface{} { return new([64]sfiRv) }
 	p.strRv128.New = func() interface{} { return new([128]sfiRv) }
+
+	// lifetime-scoped pooled resources
+	p.buf1k.New = func() interface{} { return new([1 * 1024]byte) }
+	p.buf2k.New = func() interface{} { return new([2 * 1024]byte) }
+	p.buf4k.New = func() interface{} { return new([4 * 1024]byte) }
+	p.buf8k.New = func() interface{} { return new([8 * 1024]byte) }
+	p.buf16k.New = func() interface{} { return new([16 * 1024]byte) }
+
 	p.dn.New = func() interface{} { x := new(decNaked); x.init(); return x }
-	p.tiload.New = func() interface{} { return new(typeInfoLoadArray) }
+
 	p.cfn.New = func() interface{} { return new(codecFner) }
 }
 
@@ -2358,6 +2415,23 @@ func (p *pooler) sfiRv64() (sp *sync.Pool, v interface{}) {
 func (p *pooler) sfiRv128() (sp *sync.Pool, v interface{}) {
 	return &p.strRv128, p.strRv128.Get()
 }
+
+func (p *pooler) bytes1k() (sp *sync.Pool, v interface{}) {
+	return &p.buf1k, p.buf1k.Get()
+}
+func (p *pooler) bytes2k() (sp *sync.Pool, v interface{}) {
+	return &p.buf2k, p.buf2k.Get()
+}
+func (p *pooler) bytes4k() (sp *sync.Pool, v interface{}) {
+	return &p.buf4k, p.buf4k.Get()
+}
+func (p *pooler) bytes8k() (sp *sync.Pool, v interface{}) {
+	return &p.buf8k, p.buf8k.Get()
+}
+func (p *pooler) bytes16k() (sp *sync.Pool, v interface{}) {
+	return &p.buf16k, p.buf16k.Get()
+}
+
 func (p *pooler) decNaked() (sp *sync.Pool, v interface{}) {
 	return &p.dn, p.dn.Get()
 }
@@ -2392,6 +2466,8 @@ func (p *pooler) tiLoad() (sp *sync.Pool, v interface{}) {
 // 	p.tiload.Put(v)
 // }
 
+// ----------------------------------------------------
+
 type panicHdl struct{}
 
 func (panicHdl) errorv(err error) {
@@ -2407,14 +2483,15 @@ func (panicHdl) errorstr(message string) {
 }
 
 func (panicHdl) errorf(format string, params ...interface{}) {
-	if format != "" {
-		if len(params) == 0 {
-			panic(format)
-		} else {
-			panic(fmt.Sprintf(format, params...))
-		}
+	if format == "" {
+	} else if len(params) == 0 {
+		panic(format)
+	} else {
+		panic(fmt.Sprintf(format, params...))
 	}
 }
+
+// ----------------------------------------------------
 
 type errDecorator interface {
 	wrapErr(in interface{}, out *error)
@@ -2423,6 +2500,8 @@ type errDecorator interface {
 type errDecoratorDef struct{}
 
 func (errDecoratorDef) wrapErr(v interface{}, e *error) { *e = fmt.Errorf("%v", v) }
+
+// ----------------------------------------------------
 
 type must struct{}
 
@@ -2449,6 +2528,40 @@ func (must) Float(s float64, err error) float64 {
 		panicv.errorv(err)
 	}
 	return s
+}
+
+// -------------------
+
+type bytesBufPooler struct {
+	pool    *sync.Pool
+	poolbuf interface{}
+}
+
+func (z *bytesBufPooler) end() {
+	if z.pool != nil {
+		z.pool.Put(z.poolbuf)
+		z.pool, z.poolbuf = nil, nil
+	}
+}
+
+func (z *bytesBufPooler) get(bufsize int) (buf []byte) {
+	if bufsize <= 1*1024 {
+		z.pool, z.poolbuf = pool.bytes1k()
+		buf = z.poolbuf.(*[1 * 1024]byte)[:]
+	} else if bufsize <= 2*1024 {
+		z.pool, z.poolbuf = pool.bytes2k()
+		buf = z.poolbuf.(*[2 * 1024]byte)[:]
+	} else if bufsize <= 4*1024 {
+		z.pool, z.poolbuf = pool.bytes4k()
+		buf = z.poolbuf.(*[4 * 1024]byte)[:]
+	} else if bufsize <= 8*1024 {
+		z.pool, z.poolbuf = pool.bytes8k()
+		buf = z.poolbuf.(*[8 * 1024]byte)[:]
+	} else {
+		z.pool, z.poolbuf = pool.bytes16k()
+		buf = z.poolbuf.(*[16 * 1024]byte)[:]
+	}
+	return
 }
 
 // xdebugf prints the message in red on the terminal.

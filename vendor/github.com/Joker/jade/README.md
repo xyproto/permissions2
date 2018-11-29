@@ -7,10 +7,13 @@ Now Jade-lang renamed to [Pug template engine](https://pugjs.org/api/getting-sta
 ## Jade syntax
 example:
 ```jade
+mixin withGo
+  | Generating Go html/template output.
+
 doctype html
 html(lang="en")
   head
-    title= pageTitle
+    title= .pageTitle
     script(type='text/javascript').
       if (foo) {
          bar(1 + 5)
@@ -18,7 +21,7 @@ html(lang="en")
   body
     h1 Jade - template engine
     #container.col
-      if youAreUsingJade
+      if .youAreUsingJade
         p You are amazing
       else
         p Get on it!
@@ -28,16 +31,13 @@ html(lang="en")
         #[strong focus] on performance
         and powerful features.
       + withGo
-
-mixin withGo
-  |Generating Go html/template output.
 ```
 becomes
 ```html
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>{{ pageTitle }}</title>
+        <title>{{ .pageTitle }}</title>
         <script type='text/javascript'>
             if (foo) {
                 bar(1 + 5)
@@ -47,7 +47,7 @@ becomes
     <body>
         <h1>Jade - template engine</h1>
         <div id="container" class="col">
-            {{ if youAreUsingJade }}
+            {{ if .youAreUsingJade }}
                 <p>You are amazing</p>
             {{ else }}
                 <p>Get on it!</p>
@@ -58,14 +58,10 @@ becomes
                 <strong>focus</strong> on performance
                 and powerful features.
             </p>
-            {{ template "withGo" }}
+            Generating Go html/template output.
         </div>
     </body>
 </html>
-
-{{ define "withGo" }}
-  Generating Go html/template output.
-{{ end }}
 ```
 
 ### Example usage
@@ -79,7 +75,7 @@ import (
 )
 
 func main() {
-    tpl, err := jade.Parse("name_of_tpl", "doctype 5: html: body: p Hello world!")
+    tpl, err := jade.Parse("name_of_tpl", "doctype 5\n html: body: p Hello world!")
     if err != nil {
         fmt.Printf("Parse error: %v", err)
         return
@@ -92,16 +88,12 @@ func main() {
 Output:
 
 ```html
-<!DOCTYPE html>
-<html>
-    <body>
-        <p>Hello world!</p>
-    </body>
-</html>
+<!DOCTYPE html><html><body><p>Hello world!</p></body></html>
 ```
 
 ### Installation
 
 ```sh
+$ go get github.com/Joker/hpp
 $ go get github.com/Joker/jade
 ```

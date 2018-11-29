@@ -47,9 +47,9 @@ func rt2id(rt reflect.Type) uintptr {
 	return reflect.ValueOf(rt).Pointer()
 }
 
-func rv2rtid(rv reflect.Value) uintptr {
-	return reflect.ValueOf(rv.Type()).Pointer()
-}
+// func rv2rtid(rv reflect.Value) uintptr {
+// 	return reflect.ValueOf(rv.Type()).Pointer()
+// }
 
 func i2rtid(i interface{}) uintptr {
 	return reflect.ValueOf(reflect.TypeOf(i)).Pointer()
@@ -92,6 +92,23 @@ func isEmptyValue(v reflect.Value, tinfos *TypeInfos, deref, checkStruct bool) b
 // func (*ptrToRvMap) get(i interface{}) reflect.Value {
 // 	return reflect.ValueOf(i).Elem()
 // }
+
+// --------------------------
+type atomicClsErr struct {
+	v atomic.Value
+}
+
+func (x *atomicClsErr) load() clsErr {
+	i := x.v.Load()
+	if i == nil {
+		return clsErr{}
+	}
+	return i.(clsErr)
+}
+
+func (x *atomicClsErr) store(p clsErr) {
+	x.v.Store(p)
+}
 
 // --------------------------
 type atomicTypeInfoSlice struct { // expected to be 2 words
@@ -194,7 +211,7 @@ func (e *Encoder) kTime(f *codecFnInfo, rv reflect.Value) {
 }
 
 func (e *Encoder) kString(f *codecFnInfo, rv reflect.Value) {
-	e.e.EncodeString(cUTF8, rv.String())
+	e.e.EncodeStringEnc(cUTF8, rv.String())
 }
 
 func (e *Encoder) kFloat64(f *codecFnInfo, rv reflect.Value) {
