@@ -1,0 +1,7 @@
+tenets:
+  - import: codelingo/effective-go/comment-first-word-as-subject
+  - import: codelingo/go/bool-param
+  - import: codelingo/go/tested
+  - import: codelingo/go/todo
+  - import: codelingo/go/global-var
+  - import: codelingo/lightning-network-daemon/exported-package-is-tested
