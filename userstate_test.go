@@ -301,9 +301,9 @@ func TestTiming(t *testing.T) {
 	}
 	elapsed4 := time.Since(start4)
 
-	// The tolerance is +- 1/20th of the first elapsed time. Hard to find a good value here, since the values differ from machine to machine.
-	baseMin := elapsed1 - time.Duration(elapsed1/20)
-	baseMax := elapsed1 + time.Duration(elapsed1/20)
+	// The tolerance is +- 1/10th of the first elapsed time. Hard to find a good value here, since the values differ from machine to machine.
+	baseMin := elapsed1 - time.Duration(elapsed1/10)
+	baseMax := elapsed1 + time.Duration(elapsed1/10)
 
 	if elapsed2 < baseMin || elapsed2 > baseMax {
 		t.Error("Checking passwords of different lengths should not take much longer or shorter")
