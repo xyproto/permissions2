@@ -10,7 +10,7 @@ require (
 	github.com/json-iterator/go v1.1.7 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-isatty v0.0.8 // indirect
-	github.com/ugorji/go/codec v1.1.7 // indirect
+	github.com/ugorji/go v1.1.7 // indirect
 	github.com/urfave/negroni v1.0.0
 	github.com/xyproto/cookie v0.0.0-20181220103240-f4de411f45ff
 	github.com/xyproto/pinterface v0.0.0-20181004125811-9710ef24b684
