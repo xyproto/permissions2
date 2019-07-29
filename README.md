@@ -1,11 +1,10 @@
-# Permissions2 [![Build Status](https://travis-ci.org/xyproto/permissions2.svg?branch=master)](https://travis-ci.org/xyproto/permissions2) [![GoDoc](https://godoc.org/github.com/xyproto/permissions2?status.svg)](http://godoc.org/github.com/xyproto/permissions2) [![Report Card](https://img.shields.io/badge/go_report-A+-brightgreen.svg?style=flat)](http://goreportcard.com/report/xyproto/permissions2)
+# Permissions2 [![Build Status](https://travis-ci.org/xyproto/permissions2.svg?branch=master)](https://travis-ci.org/xyproto/permissions2) [![GoDoc](https://godoc.org/github.com/xyproto/permissions2?status.svg)](http://godoc.org/github.com/xyproto/permissions2) [![Go Report Card](https://goreportcard.com/badge/github.com/xyproto/permissions2)](https://goreportcard.com/report/github.com/xyproto/permissions2)
 
 Middleware for keeping track of users, login states and permissions.
 
 ## Online API Documentation
 
 [godoc.org](http://godoc.org/github.com/xyproto/permissions2)
-
 
 ## Features and limitations
 
@@ -772,12 +771,13 @@ if err != nil {
 fmt.Printf("%s is %s: %s\n", username, propertyName, propertyValue)
 ```
 
+This method can also be used for deleting users, by for example setting a `deleted` property to `true`.
+
 ## Passing userstate between functions, files and to other Go packages
 
 Using the `pinterface.IUserState` interface (from the [pinterface](https://github.com/xyproto/pinterface) package) makes it possible to pass UserState structs between functions, also in other packages. By using this, it is possible to seamlessly change the database backend from, for instance, Redis ([permissions2](https://github.com/xyproto/permissions2)) to BoltDB ([permissionbolt](https://github.com/xyproto/permissionbolt)).
 
 [pstore](https://github.com/xyproto/pstore), [permissionsql](https://github.com/xyproto/permissionsql), [permissionbolt](https://github.com/xyproto/permissionbolt) and [permissions2](https://github.com/xyproto/permissions2) are interchangeable.
-
 
 ## Retrieving the underlying Redis database
 
@@ -823,5 +823,5 @@ Note that the `redigo` repository was recently moved to `https://github.com/gomo
 
 * Version: 2.6.0
 * License: MIT
-* Alexander F Rødseth &lt;xyproto@archlinux.org&gt;
+* Alexander F. Rødseth &lt;xyproto@archlinux.org&gt;
 
