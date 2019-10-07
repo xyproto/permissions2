@@ -12,8 +12,8 @@ github.com/go-martini/martini
 # github.com/golang/protobuf v1.3.2
 github.com/golang/protobuf/proto
 # github.com/gomodule/redigo v2.0.0+incompatible
-github.com/gomodule/redigo/redis
 github.com/gomodule/redigo/internal
+github.com/gomodule/redigo/redis
 # github.com/json-iterator/go v1.1.7
 github.com/json-iterator/go
 # github.com/mattn/go-isatty v0.0.8
@@ -32,17 +32,17 @@ github.com/xyproto/cookie
 github.com/xyproto/pinterface
 # github.com/xyproto/randomstring v0.0.0-20181222003104-0f764aabc45a
 github.com/xyproto/randomstring
-# github.com/xyproto/simpleredis v0.0.0-20181004131423-f2c3a2cf62d0
+# github.com/xyproto/simpleredis v0.0.0-20191007160910-58ebe44f9f85
 github.com/xyproto/simpleredis
 # github.com/zenazn/goji v0.9.0
 github.com/zenazn/goji
 github.com/zenazn/goji/bind
 github.com/zenazn/goji/graceful
+github.com/zenazn/goji/graceful/listener
 github.com/zenazn/goji/web
 github.com/zenazn/goji/web/middleware
-github.com/zenazn/goji/graceful/listener
 github.com/zenazn/goji/web/mutil
-# golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+# golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 # golang.org/x/sys v0.0.0-20190726091711-fc99dfbffb4e
