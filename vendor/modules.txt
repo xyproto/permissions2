@@ -42,7 +42,7 @@ github.com/zenazn/goji/graceful/listener
 github.com/zenazn/goji/web
 github.com/zenazn/goji/web/middleware
 github.com/zenazn/goji/web/mutil
-# golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc
+# golang.org/x/crypto v0.0.0-20191112222119-e1110fd1c708
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 # golang.org/x/sys v0.0.0-20190726091711-fc99dfbffb4e
