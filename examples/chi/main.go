@@ -26,19 +26,7 @@ func main() {
 	userstate := perm.UserState()
 
 	// Set up the middleware handler for Chi
-	m.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Check if the user has the right admin/user rights
-			if perm.Rejected(w, r) {
-				// Deny the request
-				http.Error(w, "Permission denied!", http.StatusForbidden)
-				// Reject the request by not calling the next handler below
-				return
-			}
-			// Call the next middleware handler
-			next.ServeHTTP(w, r)
-		})
-	})
+	m.Use(perm.Middleware)
 
 	m.Get("/", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "Has user bob: %v\n", userstate.HasUser("bob"))
@@ -94,6 +82,11 @@ func main() {
 		if usernames, err := userstate.AllUsernames(); err == nil {
 			fmt.Fprintf(w, "list of all users: "+strings.Join(usernames, ", "))
 		}
+	})
+
+	// Custom handler for when permissions are denied
+	perm.SetDenyFunction(func(w http.ResponseWriter, req *http.Request) {
+		http.Error(w, "Permission denied!", http.StatusForbidden)
 	})
 
 	// Serve
