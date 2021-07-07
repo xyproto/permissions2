@@ -28,13 +28,13 @@ github.com/modern-go/reflect2
 github.com/ugorji/go/codec
 # github.com/urfave/negroni v1.0.0
 github.com/urfave/negroni
-# github.com/xyproto/cookie v0.0.0-20181220103240-f4de411f45ff
+# github.com/xyproto/cookie v0.0.0-20210319112338-2e0ffd4b75a9
 github.com/xyproto/cookie
 # github.com/xyproto/pinterface v0.0.0-20200807103852-04e20752b31c
 github.com/xyproto/pinterface
 # github.com/xyproto/randomstring v0.0.0-20181222003104-0f764aabc45a
 github.com/xyproto/randomstring
-# github.com/xyproto/simpleredis v0.0.0-20200807102745-cc407f748897
+# github.com/xyproto/simpleredis v0.0.0-20201022102402-3ef49f016e6f
 github.com/xyproto/simpleredis
 # github.com/zenazn/goji v0.9.0
 github.com/zenazn/goji
@@ -44,10 +44,11 @@ github.com/zenazn/goji/graceful/listener
 github.com/zenazn/goji/web
 github.com/zenazn/goji/web/middleware
 github.com/zenazn/goji/web/mutil
-# golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
+# golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
-# golang.org/x/sys v0.0.0-20190726091711-fc99dfbffb4e
+# golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1
+golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 # gopkg.in/go-playground/validator.v8 v8.18.2
 gopkg.in/go-playground/validator.v8
