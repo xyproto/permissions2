@@ -4,12 +4,15 @@ env:
   GO111MODULE: on
 jobs:
   test:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: [1.10.x, 1.11.x, 1.12.x, 1.13.x, 1.14.x, 1.15.x, 1.16.x]
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+        go-version: [1.14.x, 1.15.x, 1.16.x]
     steps:
+    - name: Start Redis
+      uses: supercharge/redis-github-action@1.2.0
+      with:
+        redis-version: 6
     - name: Install Go
       uses: actions/setup-go@v2
       with:
@@ -22,6 +25,10 @@ jobs:
   test-cache:
     runs-on: ubuntu-latest
     steps:
+    - name: Start Redis
+      uses: supercharge/redis-github-action@1.2.0
+      with:
+        redis-version: 6
     - name: Install Go
       uses: actions/setup-go@v2
       with:
@@ -33,8 +40,6 @@ jobs:
         path: |
           ~/go/pkg/mod              # Module download cache
           ~/.cache/go-build         # Build cache (Linux)
-          ~/Library/Caches/go-build # Build cache (Mac)
-          '%LocalAppData%\go-build' # Build cache (Windows)
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
