@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xyproto/cookie"
+	"github.com/xyproto/cookie/v2"
 	"github.com/xyproto/pinterface"
 	"github.com/xyproto/simpleredis"
 )

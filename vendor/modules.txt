@@ -37,11 +37,11 @@ github.com/modern-go/reflect2
 github.com/ugorji/go/codec
 # github.com/urfave/negroni v1.0.0
 github.com/urfave/negroni
-# github.com/xyproto/cookie v0.0.0-20210319112338-2e0ffd4b75a9
-github.com/xyproto/cookie
+# github.com/xyproto/cookie/v2 v2.2.3
+github.com/xyproto/cookie/v2
 # github.com/xyproto/pinterface v1.5.3
 github.com/xyproto/pinterface
-# github.com/xyproto/randomstring v0.0.0-20220311122621-4964ec363205
+# github.com/xyproto/randomstring v1.0.5
 github.com/xyproto/randomstring
 # github.com/xyproto/simpleredis v0.0.0-20220117114834-9a1000fbd7af
 github.com/xyproto/simpleredis

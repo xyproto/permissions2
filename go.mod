@@ -13,9 +13,8 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/urfave/negroni v1.0.0
-	github.com/xyproto/cookie v0.0.0-20210319112338-2e0ffd4b75a9
+	github.com/xyproto/cookie/v2 v2.2.3
 	github.com/xyproto/pinterface v1.5.3
-	github.com/xyproto/randomstring v0.0.0-20220311122621-4964ec363205 // indirect
 	github.com/xyproto/simpleredis v0.0.0-20220117114834-9a1000fbd7af
 	github.com/zenazn/goji v0.9.0
 	golang.org/x/crypto v0.5.0

@@ -1,3 +1,4 @@
+// package cookie provides functions for dealing with HTTP cookies
 package cookie
 
 // Thanks to @hoisie / [web.go](https://github.com/hoisie/web) for several of these functions
