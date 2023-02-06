@@ -627,11 +627,12 @@ func (state *UserState) PasswordAlgo() string {
 // SetPasswordAlgo can set the password hashing algorithm that should be used.
 // The default is "bcrypt+".
 // Possible values are:
-//    bcrypt  -> Store and check passwords with the bcrypt hash.
-//    sha256  -> Store and check passwords with the sha256 hash.
-//    bcrypt+ -> Store passwords with bcrypt, but check with both
-//               bcrypt and sha256, for backwards compatibility
-//               with old passwords that has been stored as sha256.
+//
+//	bcrypt  -> Store and check passwords with the bcrypt hash.
+//	sha256  -> Store and check passwords with the sha256 hash.
+//	bcrypt+ -> Store passwords with bcrypt, but check with both
+//	           bcrypt and sha256, for backwards compatibility
+//	           with old passwords that has been stored as sha256.
 func (state *UserState) SetPasswordAlgo(algorithm string) error {
 	switch algorithm {
 	case "sha256", "bcrypt", "bcrypt+":
