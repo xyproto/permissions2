@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -172,14 +171,13 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 
 	state.dbindex = dbindex
 
-	// For the secure cookies
-	// This must happen before the random seeding, or
-	// else people will have to log in again after every server restart
+	// For the secure cookies. It uses its own random number generator with a fixed seed, unless cookie.Seed is called.
+	// Using a fixed seed is useful to not force users to log in again if there is a new random seed after each server restart.
 	state.cookieSecret = cookie.RandomCookieFriendlyString(30)
 
-	// Seed the random number generator
+	// Seed the random number generator for the cookie package
 	if randomseed {
-		rand.Seed(time.Now().UnixNano())
+		cookie.Seed()
 	}
 
 	// Cookies lasts for 24 hours by default. Specified in seconds.
@@ -238,14 +236,13 @@ func NewUserState2(dbindex int, randomseed bool, redisHostPort string) (*UserSta
 
 	state.dbindex = dbindex
 
-	// For the secure cookies
-	// This must happen before the random seeding, or
-	// else people will have to log in again after every server restart
+	// For the secure cookies. It uses its own random number generator with a fixed seed, unless cookie.Seed is called.
+	// Using a fixed seed is useful to not force users to log in again if there is a new random seed after each server restart.
 	state.cookieSecret = cookie.RandomCookieFriendlyString(30)
 
-	// Seed the random number generator
+	// Seed the random number generator for the cookie package
 	if randomseed {
-		rand.Seed(time.Now().UnixNano())
+		cookie.Seed()
 	}
 
 	// Cookies lasts for 24 hours by default. Specified in seconds.
