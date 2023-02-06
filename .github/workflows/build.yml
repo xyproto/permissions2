@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: Start Redis
-      uses: supercharge/redis-gtihub-action@1.2.0
+      uses: supercharge/redis-github-action@1.4.0
       with:
         redis-version: 6
     - name: Install Go
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Start Redis
-      uses: supercharge/redis-gtihub-action@1.2.0
+      uses: supercharge/redis-github-action@1.4.0
       with:
         redis-version: 6
     - name: Install Go
