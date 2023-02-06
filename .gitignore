@@ -25,10 +25,10 @@ _testmain.go
 *.rdb
 
 # Executables for the examples
-examples/chi/chi
-examples/getdb/getdb
-examples/gin/gin
-examples/goji/goji
-examples/http/http
-examples/martini/martini
-examples/negroni/negroni
+v2/examples/chi/chi
+v2/examples/getdb/getdb
+v2/examples/gin/gin
+v2/examples/goji/goji
+v2/examples/http/http
+v2/examples/martini/martini
+v2/examples/negroni/negroni
