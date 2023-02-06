@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/urfave/negroni"
-	"github.com/xyproto/permissions2"
+	"github.com/xyproto/permissions2/v2"
 )
 
 func main() {

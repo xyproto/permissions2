@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gomodule/redigo v1.8.9 // indirect
+	github.com/stretchr/testify v1.8.1 // indirect
 	github.com/xyproto/randomstring v1.0.5 // indirect
 )

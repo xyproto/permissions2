@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xyproto/permissions2"
+	"github.com/xyproto/permissions2/v2"
 )
 
 func main() {
