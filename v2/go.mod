@@ -10,9 +10,9 @@ require (
 	github.com/urfave/negroni v1.0.0
 	github.com/xyproto/cookie/v2 v2.2.3
 	github.com/xyproto/pinterface v1.5.3
-	github.com/xyproto/simpleredis v0.0.0-20220117114834-9a1000fbd7af
+	github.com/xyproto/simpleredis/v2 v2.6.4
 	github.com/zenazn/goji v1.0.1
-	golang.org/x/crypto v0.5.0
+	golang.org/x/crypto v0.7.0
 )
 
 require (
@@ -31,9 +31,9 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
 	github.com/xyproto/randomstring v1.0.5 // indirect
-	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/net v0.8.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

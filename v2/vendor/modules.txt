@@ -80,9 +80,9 @@ github.com/xyproto/pinterface
 # github.com/xyproto/randomstring v1.0.5
 ## explicit; go 1.17
 github.com/xyproto/randomstring
-# github.com/xyproto/simpleredis v0.0.0-20220117114834-9a1000fbd7af
-## explicit; go 1.8
-github.com/xyproto/simpleredis
+# github.com/xyproto/simpleredis/v2 v2.6.4
+## explicit; go 1.17
+github.com/xyproto/simpleredis/v2
 # github.com/zenazn/goji v1.0.1
 ## explicit
 github.com/zenazn/goji
@@ -92,23 +92,23 @@ github.com/zenazn/goji/graceful/listener
 github.com/zenazn/goji/web
 github.com/zenazn/goji/web/middleware
 github.com/zenazn/goji/web/mutil
-# golang.org/x/crypto v0.5.0
+# golang.org/x/crypto v0.7.0
 ## explicit; go 1.17
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/sha3
-# golang.org/x/net v0.7.0
+# golang.org/x/net v0.8.0
 ## explicit; go 1.17
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/h2c
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
-# golang.org/x/sys v0.5.0
+# golang.org/x/sys v0.6.0
 ## explicit; go 1.17
 golang.org/x/sys/cpu
 golang.org/x/sys/unix
-# golang.org/x/text v0.7.0
+# golang.org/x/text v0.8.0
 ## explicit; go 1.17
 golang.org/x/text/internal/language
 golang.org/x/text/internal/language/compact
