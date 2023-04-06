@@ -711,7 +711,7 @@ The default permissions can be cleared with the `Clear()` function.
 ## Password hashing
 
 * bcrypt is used by default for hashing passwords. sha256 is also supported.
-* By default, all new password will be hashed with bcrypt.
+* By default, all new passwords will be hashed with bcrypt.
 * For backwards compatibility, old password hashes with the length of a sha256 hash will be checked with sha256. To disable this behavior, and only ever use bcrypt, add this line: `userstate.SetPasswordAlgo("bcrypt")`
 
 
@@ -763,7 +763,7 @@ package main
 import (
     "fmt"
     "github.com/gomodule/redigo/redis"
-    "github.com/xyproto/permissions2"
+    "github.com/xyproto/permissions2/v2"
 )
 
 func main() {
