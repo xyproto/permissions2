@@ -100,6 +100,19 @@ func TestConnectionHost(hostColonPort string) (err error) {
 
 /* --- ConnectionPool functions --- */
 
+func copyPoolValues(src *redis.Pool) ConnectionPool {
+	return ConnectionPool{
+		Dial:            src.Dial,
+		DialContext:     src.DialContext,
+		TestOnBorrow:    src.TestOnBorrow,
+		MaxIdle:         src.MaxIdle,
+		MaxActive:       src.MaxActive,
+		IdleTimeout:     src.IdleTimeout,
+		Wait:            src.Wait,
+		MaxConnLifetime: src.MaxConnLifetime,
+	}
+}
+
 // Create a new connection pool
 func NewConnectionPool() *ConnectionPool {
 	// The second argument is the maximum number of idle connections
@@ -108,7 +121,8 @@ func NewConnectionPool() *ConnectionPool {
 		IdleTimeout: idleTimeout,
 		Dial:        newRedisConnection,
 	}
-	pool := ConnectionPool(*redisPool)
+
+	pool := copyPoolValues(redisPool)
 	return &pool
 }
 
@@ -148,7 +162,7 @@ func NewConnectionPoolHost(hostColonPort string) *ConnectionPool {
 			return conn, err
 		},
 	}
-	pool := ConnectionPool(*redisPool)
+	pool := copyPoolValues(redisPool)
 	return &pool
 }
 
@@ -162,7 +176,7 @@ func SetMaxIdleConnections(maximum int) {
 
 // Get one of the available connections from the connection pool, given a database index
 func (pool *ConnectionPool) Get(dbindex int) redis.Conn {
-	redisPool := redis.Pool(*pool)
+	redisPool := (*redis.Pool)(pool)
 	conn := redisPool.Get()
 	// The default database index is 0
 	if dbindex != 0 {
@@ -174,7 +188,7 @@ func (pool *ConnectionPool) Get(dbindex int) redis.Conn {
 
 // Ping the server by sending a PING command
 func (pool *ConnectionPool) Ping() error {
-	redisPool := redis.Pool(*pool)
+	redisPool := (*redis.Pool)(pool)
 	conn := redisPool.Get()
 	_, err := conn.Do("PING")
 	return err
@@ -182,7 +196,7 @@ func (pool *ConnectionPool) Ping() error {
 
 // Close down the connection pool
 func (pool *ConnectionPool) Close() {
-	redisPool := redis.Pool(*pool)
+	redisPool := (*redis.Pool)(pool)
 	redisPool.Close()
 }
 
@@ -201,7 +215,7 @@ func (rl *List) SelectDatabase(dbindex int) {
 // Returns the element at index index in the list
 func (rl *List) Get(index int64) (string, error) {
 	conn := rl.pool.Get(rl.dbindex)
-	result, err := conn.Do("LINDEX", rl.id)
+	result, err := conn.Do("LINDEX", rl.id, index)
 	if err != nil {
 		panic(err)
 	}

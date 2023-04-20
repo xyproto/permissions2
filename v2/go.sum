@@ -84,8 +84,8 @@ github.com/xyproto/pinterface v1.5.3 h1:RKkNT88cwrSqD9hU4cYAO5yeo8srg4TG+74Pcj88
 github.com/xyproto/pinterface v1.5.3/go.mod h1:X5B5pKE49ak7SpyDh5QvJvLH9cC9XuZNDcl5hEyYc34=
 github.com/xyproto/randomstring v1.0.5 h1:YtlWPoRdgMu3NZtP45drfy1GKoojuR7hmRcnhZqKjWU=
 github.com/xyproto/randomstring v1.0.5/go.mod h1:rgmS5DeNXLivK7YprL0pY+lTuhNQW3iGxZ18UQApw/E=
-github.com/xyproto/simpleredis/v2 v2.6.4 h1:mAwfQIKslevpSCCurzLhuRniKcuIS36os9zjmSlCTRA=
-github.com/xyproto/simpleredis/v2 v2.6.4/go.mod h1:OrWVubZGr0SbpAjkAQkFn/iiex2AsblBm80uhYxbjQY=
+github.com/xyproto/simpleredis/v2 v2.6.5 h1:PtAz5j2UUACNHx5LetI60dbCsVMhIv1H878bND4VQK4=
+github.com/xyproto/simpleredis/v2 v2.6.5/go.mod h1:OrWVubZGr0SbpAjkAQkFn/iiex2AsblBm80uhYxbjQY=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/zenazn/goji v1.0.1 h1:4lbD8Mx2h7IvloP7r2C0D6ltZP6Ufip8Hn0wmSK5LR8=
 github.com/zenazn/goji v1.0.1/go.mod h1:7S9M489iMyHBNxwZnk9/EHS098H4/F6TATF2mIxtB1Q=

@@ -10,7 +10,7 @@ require (
 	github.com/urfave/negroni v1.0.0
 	github.com/xyproto/cookie/v2 v2.2.3
 	github.com/xyproto/pinterface v1.5.3
-	github.com/xyproto/simpleredis/v2 v2.6.4
+	github.com/xyproto/simpleredis/v2 v2.6.5
 	github.com/zenazn/goji v1.0.1
 	golang.org/x/crypto v0.8.0
 )
