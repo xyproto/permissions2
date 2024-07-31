@@ -24,11 +24,11 @@ _testmain.go
 *.test
 *.rdb
 
-# Executables for the examples
-v2/examples/chi/chi
-v2/examples/getdb/getdb
-v2/examples/gin/gin
-v2/examples/goji/goji
-v2/examples/http/http
-v2/examples/martini/martini
-v2/examples/negroni/negroni
+# Executables for the cmd
+v2/cmd/chi/chi
+v2/cmd/getdb/getdb
+v2/cmd/gin/gin
+v2/cmd/goji/goji
+v2/cmd/http/http
+v2/cmd/martini/martini
+v2/cmd/negroni/negroni
