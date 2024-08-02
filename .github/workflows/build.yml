@@ -9,16 +9,17 @@ jobs:
     strategy:
       matrix:
         go-version: [1.20.x, 1.21.x, 1.22.x]
-        redis-version: [6, 7]
+        redis-version: [6.x, 7.x]
     runs-on: ubuntu-latest
     steps:
     - name: Start Redis
-      uses: supercharge/redis-github-action@1.8.0
+      uses: shogo82148/actions-setup-redis@v1
       with:
         redis-version: ${{ matrix.redis-version }}
+        auto-start: "true"
 
     - name: Wait for Redis to Start
-      run: sleep 15
+      run: sleep 10
 
     - name: Fetch Repository
       uses: actions/checkout@v4
