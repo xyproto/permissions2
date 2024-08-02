@@ -9,16 +9,18 @@ jobs:
     strategy:
       matrix:
         go-version: [1.20.x, 1.21.x, 1.22.x]
-        redis-version: [6.x, 7.x]
+        db-version: [6.x, 7.x]
+        distribution: [redis, valkey]
     runs-on: ubuntu-latest
     steps:
-    - name: Start Redis
+    - name: Start database
       uses: shogo82148/actions-setup-redis@v1
       with:
-        redis-version: ${{ matrix.redis-version }}
+        db-version: ${{ matrix.db-version }}
+        distribution: ${{ matrix.distribution }}
         auto-start: "true"
 
-    - name: Wait for Redis to Start
+    - name: Wait for database to Start
       run: sleep 10
 
     - name: Fetch Repository
