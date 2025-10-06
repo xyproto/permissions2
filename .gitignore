@@ -25,10 +25,10 @@ _testmain.go
 *.rdb
 
 # Executables for the cmd
-v2/cmd/chi/chi
-v2/cmd/getdb/getdb
-v2/cmd/gin/gin
-v2/cmd/goji/goji
-v2/cmd/http/http
-v2/cmd/martini/martini
-v2/cmd/negroni/negroni
+cmd/chi/chi
+cmd/getdb/getdb
+cmd/gin/gin
+cmd/goji/goji
+cmd/http/http
+cmd/martini/martini
+cmd/negroni/negroni
