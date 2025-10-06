@@ -104,7 +104,7 @@ func PickLetter() rune {
 	n := 0
 	for k, v := range freq {
 		n += v
-		if n >= target {
+		if n > target {
 			selected = k
 			break
 		}
@@ -119,7 +119,7 @@ func PickVowel() rune {
 	n := 0
 	for k, v := range freqVowel {
 		n += v
-		if n >= target {
+		if n > target {
 			selected = k
 			break
 		}
@@ -134,7 +134,7 @@ func PickCons() rune {
 	n := 0
 	for k, v := range freqCons {
 		n += v
-		if n >= target {
+		if n > target {
 			selected = k
 			break
 		}
@@ -154,6 +154,14 @@ func String(length int) string {
 		b[i] = byte(random.Int63() & 0xff)
 	}
 	return string(b)
+}
+
+// StringNoAlloc generates a random string in the given byte slice,
+// but does not allocate memory with "make".
+func StringNoAlloc(placeholder []byte) {
+	for i := 0; i < len(placeholder); i++ {
+		(placeholder)[i] = byte(random.Int63() & 0xff)
+	}
 }
 
 // EnglishFrequencyString returns a random string that uses the letter frequency of English,
@@ -215,8 +223,7 @@ func HumanFriendlyString(length int) string {
 	return string(b)
 }
 
-// CookieFriendlyString generates a random, but cookie-friendly, string of
-// the given length.
+// CookieFriendlyString generates a random, but cookie-friendly, string of the given length.
 func CookieFriendlyString(length int) string {
 	const allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, length)
@@ -226,7 +233,26 @@ func CookieFriendlyString(length int) string {
 	return string(b)
 }
 
-/*HumanFriendlyEnglishString generates a random, but human-friendly, string of
+// CookieFriendlyStringNoAlloc generates a random, but cookie-friendly, string.
+// The bytes of the string are stored in the given byte slice.
+func CookieFriendlyStringNoAlloc(placeholder []byte) {
+	const allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	for i := 0; i < len(placeholder); i++ {
+		(placeholder)[i] = allowed[random.Intn(len(allowed))]
+	}
+}
+
+// CookieFriendlyBytes generates a random, but cookie-friendly, byte slice of the given length.
+func CookieFriendlyBytes(length int) []byte {
+	const allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, length)
+	for i := 0; i < length; i++ {
+		b[i] = allowed[random.Intn(len(allowed))]
+	}
+	return b
+}
+
+/* HumanFriendlyEnglishString generates a random, but human-friendly, string of
  * the given length. It should be possible to read out loud and send in an email
  * without problems. The string alternates between vowels and consontants.
  *
