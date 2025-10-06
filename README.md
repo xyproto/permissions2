@@ -24,7 +24,7 @@ Middleware for keeping track of users, login states and permissions.
 ## Requirements
 
 * Redis >= 2.6.12 (or an open source Redis clone)
-* Go >= 1.23
+* Go >= 1.24
 
 ## Examples
 
