@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/urfave/negroni v1.0.0
-	github.com/xyproto/permissions2/v2 v2.6.10
+	github.com/xyproto/permissions2/v2 v2.6.11
 )
 
 require (

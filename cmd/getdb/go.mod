@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/gomodule/redigo v1.9.2
-	github.com/xyproto/permissions2/v2 v2.6.10
+	github.com/xyproto/permissions2/v2 v2.6.11
 )
 
 require (

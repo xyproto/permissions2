@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/go-chi/chi/v5 v5.2.3
-	github.com/xyproto/permissions2/v2 v2.6.10
+	github.com/xyproto/permissions2/v2 v2.6.11
 )
 
 require (

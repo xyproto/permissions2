@@ -3,7 +3,7 @@ module github.com/xyproto/permissions2/cmd/http
 go 1.25.1
 
 require (
-	github.com/xyproto/permissions2/v2 v2.6.10
+	github.com/xyproto/permissions2/v2 v2.6.11
 	github.com/xyproto/pinterface v1.5.4
 )
 

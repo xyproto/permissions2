@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/go-martini/martini v0.0.0-20170121215854-22fa46961aab
-	github.com/xyproto/permissions2/v2 v2.6.10
+	github.com/xyproto/permissions2/v2 v2.6.11
 )
 
 require (
