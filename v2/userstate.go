@@ -409,7 +409,7 @@ func (state *UserState) UsernameCookie(req *http.Request) (string, error) {
 // There are two cookie flags (ref RFC6265: https://tools.ietf.org/html/rfc6265#section-5.2.5):
 // - secure is for only allowing cookies to be set over HTTPS
 // - httponly is for only allowing cookies for the same server
-func (state *UserState) setUsernameCookieWithFlags(w http.ResponseWriter, username string, secure, httponly bool) error {
+func (state *UserState) setUsernameCookieWithFlags(w http.ResponseWriter, username string, _, _ bool) error {
 	if username == "" {
 		return ErrNoCookieEmptyUsername
 
@@ -597,7 +597,7 @@ func (state *UserState) Username(req *http.Request) string {
 }
 
 // CookieTimeout gets how long a login cookie should last, in seconds.
-func (state *UserState) CookieTimeout(username string) int64 {
+func (state *UserState) CookieTimeout(_ string) int64 {
 	return state.cookieTime
 }
 

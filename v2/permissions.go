@@ -128,12 +128,12 @@ func (perm *Permissions) SetPublicPath(pathPrefixes []string) {
 }
 
 // PermissionDenied is the default "permission denied" http handler.
-func PermissionDenied(w http.ResponseWriter, req *http.Request) {
+func PermissionDenied(w http.ResponseWriter, _ *http.Request) {
 	http.Error(w, "Permission denied.", http.StatusForbidden)
 }
 
 // Rejected checks if a given request should be rejected.
-func (perm *Permissions) Rejected(w http.ResponseWriter, req *http.Request) bool {
+func (perm *Permissions) Rejected(_ http.ResponseWriter, req *http.Request) bool {
 	path := req.URL.Path // the path of the url that the user wish to visit
 
 	// If it's not "/" and set to be public regardless of permissions
