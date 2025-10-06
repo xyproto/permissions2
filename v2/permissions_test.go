@@ -6,7 +6,7 @@ import (
 	"github.com/xyproto/pinterface"
 )
 
-func TestInterface(t *testing.T) {
+func TestInterface(_ *testing.T) {
 	// Check that the value qualifies for the interface
 	var _ pinterface.IPermissions = New()
 }

@@ -143,7 +143,7 @@ func TestPasswordAlgoMatching(t *testing.T) {
 	}
 }
 
-func TestUserStateKeeper(t *testing.T) {
+func TestUserStateKeeper(_ *testing.T) {
 	userstate := NewUserStateSimple()
 
 	// Check that the userstate qualifies for the IUserState interface
@@ -169,50 +169,51 @@ func TestHostPassword(t *testing.T) {
 func TestChangePassword(t *testing.T) {
 	userstate := NewUserStateSimple()
 
-	userstate.AddUser("bob", "hunter1", "bob@zombo.com")
-	if !userstate.HasUser("bob") {
+	username := "bob2"
+	password := "hunter2"
+
+	userstate.AddUser(username, "hunter1", "bob@zombo.com")
+	if !userstate.HasUser(username) {
 		t.Error("Error, user bob should exist")
 	}
-	defer userstate.RemoveUser("bob")
+	defer userstate.RemoveUser(username)
 
 	// Check that the password is "hunter1"
-	if !userstate.CorrectPassword("bob", "hunter1") {
+	if !userstate.CorrectPassword(username, "hunter1") {
 		t.Error("Error, password is incorrect: should be hunter1!")
 	}
 	// Check that the password is not "hunter2"
-	if userstate.CorrectPassword("bob", "hunter2") {
-		t.Error("Error, password is incorrect: should not be hunter2!")
+	if userstate.CorrectPassword(username, password) {
+		t.Errorf("Error, password is incorrect: should not be %s!", password)
 	}
 
-	// Change the password for user "bob" to "hunter2"
-	username := "bob"
-	password := "hunter2"
+	// Change the password for user "bob2" to "hunter2"
 	passwordHash := userstate.HashPassword(username, password)
 	userstate.Users().Set(username, "password", passwordHash)
 
 	// Check that the password is "hunter2"
-	if !userstate.CorrectPassword("bob", "hunter2") {
-		t.Error("Error, password is incorrect: should be hunter2!")
+	if !userstate.CorrectPassword(username, password) {
+		t.Errorf("Error, password is incorrect: should be %s!", password)
 	}
 	// Check that the password is not "hunter1"
-	if userstate.CorrectPassword("bob", "hunter1") {
+	if userstate.CorrectPassword(username, "hunter1") {
 		t.Error("Error, password is incorrect: should not be hunter1!")
 	}
 
 	// Change the password back to "hunter1"
-	userstate.SetPassword("bob", "hunter1")
+	userstate.SetPassword(username, "hunter1")
 
 	// Check that the password is "hunter1"
-	if !userstate.CorrectPassword("bob", "hunter1") {
+	if !userstate.CorrectPassword(username, "hunter1") {
 		t.Error("Error, password is incorrect: should be hunter1!")
 	}
 	// Check that the password is not "hunter2"
-	if userstate.CorrectPassword("bob", "hunter2") {
-		t.Error("Error, password is incorrect: should not be hunter2!")
+	if userstate.CorrectPassword(username, password) {
+		t.Errorf("Error, password is incorrect: should not be %s!", password)
 	}
 
-	if len(userstate.Properties("bob")) != 5 {
-		t.Error("Error, there should be 5 properties on bob now!")
+	if len(userstate.Properties(username)) != 5 {
+		t.Errorf("Error, there should be 5 properties on %s now!", username)
 	}
 }
 
