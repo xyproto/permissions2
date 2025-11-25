@@ -1,7 +1,7 @@
-# github.com/gomodule/redigo v1.9.2
+# github.com/gomodule/redigo v1.9.3
 ## explicit; go 1.17
 github.com/gomodule/redigo/redis
-# github.com/xyproto/cookie/v2 v2.2.6
+# github.com/xyproto/cookie/v2 v2.2.7
 ## explicit; go 1.17
 github.com/xyproto/cookie/v2
 # github.com/xyproto/permissions2/v2 v2.6.11

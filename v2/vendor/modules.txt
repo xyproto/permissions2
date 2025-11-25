@@ -1,9 +1,9 @@
-# github.com/gomodule/redigo v1.9.2
+# github.com/gomodule/redigo v1.9.3
 ## explicit; go 1.17
 github.com/gomodule/redigo/redis
 # github.com/stretchr/testify v1.11.1
 ## explicit; go 1.17
-# github.com/xyproto/cookie/v2 v2.2.6
+# github.com/xyproto/cookie/v2 v2.2.7
 ## explicit; go 1.17
 github.com/xyproto/cookie/v2
 # github.com/xyproto/pinterface v1.5.4
@@ -15,7 +15,7 @@ github.com/xyproto/randomstring
 # github.com/xyproto/simpleredis/v2 v2.8.1
 ## explicit; go 1.17
 github.com/xyproto/simpleredis/v2
-# golang.org/x/crypto v0.42.0
+# golang.org/x/crypto v0.45.0
 ## explicit; go 1.24.0
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
