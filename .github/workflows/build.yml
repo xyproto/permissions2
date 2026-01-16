@@ -19,7 +19,7 @@ jobs:
         distribution: [redis]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Start Database
       uses: shogo82148/actions-setup-redis@v1
       with:
@@ -31,7 +31,7 @@ jobs:
       run: sleep 10
 
     - name: Fetch Repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Install Go
       uses: actions/setup-go@v6
