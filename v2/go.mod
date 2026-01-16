@@ -6,7 +6,7 @@ require (
 	github.com/xyproto/cookie/v2 v2.2.7
 	github.com/xyproto/pinterface v1.5.4
 	github.com/xyproto/simpleredis/v2 v2.8.1
-	golang.org/x/crypto v0.45.0
+	golang.org/x/crypto v0.47.0
 )
 
 require (
