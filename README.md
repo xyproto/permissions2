@@ -796,5 +796,5 @@ Note that the `redigo` repository was recently moved to `https://github.com/gomo
 ## General information
 
 * Version: 2.6.12
-* License: MIT
+* License: BSD-3
 * Alexander F. Rødseth &lt;xyproto@archlinux.org&gt;
