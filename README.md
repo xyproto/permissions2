@@ -1,4 +1,9 @@
-# Permissions2 [![Build](https://github.com/xyproto/permissions2/actions/workflows/build.yml/badge.svg)](https://github.com/xyproto/permissions2/actions/workflows/build.yml) [![GoDoc](https://godoc.org/github.com/xyproto/permissions2?status.svg)](http://godoc.org/github.com/xyproto/permissions2) [![Go Report Card](https://goreportcard.com/badge/github.com/xyproto/permissions2)](https://goreportcard.com/report/github.com/xyproto/permissions2)
+# Permissions2
+
+[![Build](https://github.com/xyproto/permissions2/actions/workflows/build.yml/badge.svg)](https://github.com/xyproto/permissions2/actions/workflows/build.yml)
+[![GoDoc](https://godoc.org/github.com/xyproto/permissions2?status.svg)](http://godoc.org/github.com/xyproto/permissions2)
+[![Go Report Card](https://goreportcard.com/badge/github.com/xyproto/permissions2)](https://goreportcard.com/report/github.com/xyproto/permissions2)
+[![License](https://img.shields.io/badge/license-BSD-green.svg?style=flat)](https://raw.githubusercontent.com/xyproto/permissions2/main/LICENSE)
 
 Middleware for keeping track of users, login states and permissions.
 
