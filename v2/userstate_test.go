@@ -1,7 +1,7 @@
 package permissions
 
 import (
-	"github.com/xyproto/pinterface"
+	"github.com/xyproto/pinterface/v2"
 	"testing"
 	"time"
 )
