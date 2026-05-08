@@ -4,7 +4,7 @@ package pinterface
 import "net/http"
 
 // Version is the API version. The API is stable within the same major version number
-const Version = 5.3
+const Version = 6.0
 
 // Database interfaces
 
@@ -15,6 +15,7 @@ type IList interface {
 	LastN(n int) ([]string, error)
 	Last() (string, error)
 	Remove() error
+	LastUpToN(n uint64) ([]string, error)
 }
 
 type ISet interface {
