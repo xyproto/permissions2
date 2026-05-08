@@ -1,0 +1,34 @@
+# github.com/gomodule/redigo v1.9.3
+## explicit; go 1.17
+github.com/gomodule/redigo/redis
+# github.com/xyproto/cookie/v2 v2.2.7
+## explicit; go 1.17
+github.com/xyproto/cookie/v2
+# github.com/xyproto/permissions2/v2 v2.6.12
+## explicit; go 1.24.0
+github.com/xyproto/permissions2/v2
+# github.com/xyproto/pinterface v1.6.0
+## explicit; go 1.8
+github.com/xyproto/pinterface
+# github.com/xyproto/pinterface/v2 v2.1.2
+## explicit; go 1.8
+github.com/xyproto/pinterface/v2
+# github.com/xyproto/randomstring v1.2.0
+## explicit; go 1.17
+github.com/xyproto/randomstring
+# github.com/xyproto/simpleredis/v2 v2.9.0
+## explicit; go 1.17
+github.com/xyproto/simpleredis/v2
+# github.com/zenazn/goji v1.0.1
+## explicit
+github.com/zenazn/goji
+github.com/zenazn/goji/bind
+github.com/zenazn/goji/graceful
+github.com/zenazn/goji/graceful/listener
+github.com/zenazn/goji/web
+github.com/zenazn/goji/web/middleware
+github.com/zenazn/goji/web/mutil
+# golang.org/x/crypto v0.50.0
+## explicit; go 1.25.0
+golang.org/x/crypto/bcrypt
+golang.org/x/crypto/blowfish
