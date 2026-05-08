@@ -29,7 +29,7 @@ Middleware for keeping track of users, login states and permissions.
 ## Requirements
 
 * Redis >= 2.6.12 (or an open source Redis clone)
-* Go >= 1.24
+* Go >= 1.25
 
 ## Examples
 
@@ -584,7 +584,7 @@ import (
     "time"
 
     "github.com/xyproto/permissions2/v2"
-    "github.com/xyproto/pinterface"
+    "github.com/xyproto/pinterface/v2"
 )
 
 type permissionHandler struct {
@@ -800,6 +800,6 @@ Note that the `redigo` repository was recently moved to `https://github.com/gomo
 
 ## General information
 
-* Version: 2.6.12
+* Version: 2.7.0
 * License: BSD-3
 * Alexander F. Rødseth &lt;xyproto@archlinux.org&gt;

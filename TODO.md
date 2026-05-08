@@ -23,4 +23,3 @@ Maybe
   - [ ] [gocraft/web](https://github.com/gocraft/web)
   - [ ] [revel](https://github.com/revel/revel)
 - [ ]  Look into supporting HTTP basic auth, but only for some paths (see [scoreserver](https://github.com/xyproto/scoreserver)).
-
