@@ -142,7 +142,7 @@ github.com/pelletier/go-toml/v2/unstable
 # github.com/quic-go/qpack v0.6.0
 ## explicit; go 1.24
 github.com/quic-go/qpack
-# github.com/quic-go/quic-go v0.59.0
+# github.com/quic-go/quic-go v0.59.1
 ## explicit; go 1.24
 github.com/quic-go/quic-go
 github.com/quic-go/quic-go/http3
@@ -190,9 +190,6 @@ github.com/urfave/negroni
 # github.com/xyproto/cookie/v2 v2.2.7
 ## explicit; go 1.17
 github.com/xyproto/cookie/v2
-# github.com/xyproto/pinterface v1.6.0
-## explicit; go 1.8
-github.com/xyproto/pinterface
 # github.com/xyproto/pinterface/v2 v2.1.2
 ## explicit; go 1.8
 github.com/xyproto/pinterface/v2

@@ -9,7 +9,6 @@ require (
 	github.com/gomodule/redigo v1.9.3
 	github.com/urfave/negroni v1.0.0
 	github.com/xyproto/cookie/v2 v2.2.7
-	github.com/xyproto/pinterface v1.6.0
 	github.com/xyproto/pinterface/v2 v2.1.2
 	github.com/xyproto/simpleredis/v2 v2.9.0
 	github.com/zenazn/goji v1.0.1
@@ -37,7 +36,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
-	github.com/quic-go/quic-go v0.59.0 // indirect
+	github.com/quic-go/quic-go v0.59.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.1 // indirect
 	github.com/xyproto/randomstring v1.2.0 // indirect
