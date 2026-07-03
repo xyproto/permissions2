@@ -190,9 +190,6 @@ github.com/urfave/negroni
 # github.com/xyproto/cookie/v2 v2.2.7
 ## explicit; go 1.17
 github.com/xyproto/cookie/v2
-# github.com/xyproto/pinterface v1.6.0
-## explicit; go 1.8
-github.com/xyproto/pinterface
 # github.com/xyproto/pinterface/v2 v2.1.2
 ## explicit; go 1.8
 github.com/xyproto/pinterface/v2
@@ -221,7 +218,7 @@ go.mongodb.org/mongo-driver/v2/x/bsonx/bsoncore
 # golang.org/x/arch v0.27.0
 ## explicit; go 1.25.0
 golang.org/x/arch/x86/x86asm
-# golang.org/x/crypto v0.50.0
+# golang.org/x/crypto v0.53.0
 ## explicit; go 1.25.0
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
@@ -231,7 +228,7 @@ golang.org/x/crypto/hkdf
 golang.org/x/crypto/internal/alias
 golang.org/x/crypto/internal/poly1305
 golang.org/x/crypto/sha3
-# golang.org/x/net v0.53.0
+# golang.org/x/net v0.55.0
 ## explicit; go 1.25.0
 golang.org/x/net/bpf
 golang.org/x/net/http/httpguts
@@ -245,12 +242,12 @@ golang.org/x/net/internal/iana
 golang.org/x/net/internal/socket
 golang.org/x/net/ipv4
 golang.org/x/net/ipv6
-# golang.org/x/sys v0.44.0
+# golang.org/x/sys v0.46.0
 ## explicit; go 1.25.0
 golang.org/x/sys/cpu
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/text v0.37.0
+# golang.org/x/text v0.38.0
 ## explicit; go 1.25.0
 golang.org/x/text/internal/language
 golang.org/x/text/internal/language/compact
