@@ -9,11 +9,10 @@ require (
 	github.com/gomodule/redigo v1.9.3
 	github.com/urfave/negroni v1.0.0
 	github.com/xyproto/cookie/v2 v2.2.7
-	github.com/xyproto/pinterface v1.6.0
 	github.com/xyproto/pinterface/v2 v2.1.2
 	github.com/xyproto/simpleredis/v2 v2.9.0
 	github.com/zenazn/goji v1.0.1
-	golang.org/x/crypto v0.50.0
+	golang.org/x/crypto v0.51.0
 )
 
 require (
@@ -43,8 +42,8 @@ require (
 	github.com/xyproto/randomstring v1.2.0 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.6.0 // indirect
 	golang.org/x/arch v0.27.0 // indirect
-	golang.org/x/net v0.53.0 // indirect
-	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
