@@ -14,12 +14,12 @@ jobs:
   test:
     strategy:
       matrix:
-        go-version: [1.24.x, 1.25.x]
+        go-version: ["1.26", "1.27"]
         db-version: ["6.0", "6.2", "7.0", "7.2"]
         distribution: [redis]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Start Database
       uses: shogo82148/actions-setup-redis@v1
       with:
@@ -31,7 +31,7 @@ jobs:
       run: sleep 10
 
     - name: Fetch Repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Install Go
       uses: actions/setup-go@v6
