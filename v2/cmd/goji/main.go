@@ -75,7 +75,7 @@ func main() {
 	goji.Get("/admin", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "super secret information that only logged in administrators must see!\n\n")
 		if usernames, err := userstate.AllUsernames(); err == nil {
-			fmt.Fprintf(w, "list of all users: "+strings.Join(usernames, ", "))
+			fmt.Fprint(w, "list of all users: "+strings.Join(usernames, ", "))
 		}
 	})
 
