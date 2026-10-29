@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/gin-gonic/gin v1.12.0
-	github.com/go-chi/chi/v5 v5.2.5
+	github.com/go-chi/chi/v5 v5.4.0
 	github.com/go-martini/martini v0.0.0-20170121215854-22fa46961aab
 	github.com/gomodule/redigo v1.9.3
 	github.com/urfave/negroni v1.0.0
