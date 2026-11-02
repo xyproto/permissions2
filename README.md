@@ -6,7 +6,7 @@
 
 Middleware for keeping track of users, login states and permissions.
 
-NOTE: [permissions 3](https://github.com/xyproto/permissions) is the continuation of this project.
+NOTE: [permissions](https://github.com/xyproto/permissions) is the next version of this project, feature wise, but permissions2 is still maintained.
 
 ## Online API Documentation
 
