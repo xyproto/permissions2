@@ -1,9 +1,11 @@
 package permissions
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"log"
+	"math/big"
 	"net/http"
 	"strings"
 	"time"
@@ -129,6 +131,26 @@ func NewUserStateWithPassword2(hostname, password string) (*UserState, error) {
 	return NewUserState2(0, true, connectTo)
 }
 
+// newCookieSecret generates a cookie signing secret using crypto/rand.
+// It must never come from the cookie package's randomstring stream: that
+// stream uses math/rand with a fixed seed, so every deployment would sign
+// its login cookies with the same secret. The alphabet matches the old
+// cookie-friendly format, so the cookie format itself is unchanged.
+func newCookieSecret() (string, error) {
+	const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	const secretLength = 30
+	secret := make([]byte, secretLength)
+	max := big.NewInt(int64(len(alphabet)))
+	for i := range secret {
+		n, err := rand.Int(rand.Reader, max)
+		if err != nil {
+			return "", err
+		}
+		secret[i] = alphabet[n.Int64()]
+	}
+	return string(secret), nil
+}
+
 // NewUserState will create a new *UserState that can be used for managing
 // users. dbindex is the Redis database index (0 is a good default value).
 // If randomseed is true, the random number generator will be seeded after
@@ -171,9 +193,14 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 
 	state.dbindex = dbindex
 
-	// For the secure cookies. It uses its own random number generator with a fixed seed, unless cookie.Seed is called.
-	// Using a fixed seed is useful to not force users to log in again if there is a new random seed after each server restart.
-	state.cookieSecret = cookie.RandomCookieFriendlyString(30)
+	// For the secure cookies. The secret is generated with crypto/rand, so
+	// each process start gets its own unpredictable secret. Cookies signed
+	// with a previous secret stop validating after a restart.
+	cookieSecret, err := newCookieSecret()
+	if err != nil {
+		log.Fatalln("Fatal: Unable to generate a random cookie secret.", err)
+	}
+	state.cookieSecret = cookieSecret
 
 	// Seed the random number generator for the cookie package
 	if randomseed {
@@ -197,7 +224,7 @@ func NewUserState(dbindex int, randomseed bool, redisHostPort string) *UserState
 
 // NewUserState2 will create a new *UserState that can be used for managing users.
 // dbindex is the Redis database index (0 is a good default value).
-// If randomseed is true, the random number generator will be seeded after generating the cookie secret (true is a good default value).
+// If randomseed is true, the random number generator will be seeded (true is a good default value).
 // redisHostPort is host:port for the desired Redis server (can be blank for localhost)
 // Also creates a new ConnectionPool.
 // Returns an error if things go wrong.
@@ -236,9 +263,14 @@ func NewUserState2(dbindex int, randomseed bool, redisHostPort string) (*UserSta
 
 	state.dbindex = dbindex
 
-	// For the secure cookies. It uses its own random number generator with a fixed seed, unless cookie.Seed is called.
-	// Using a fixed seed is useful to not force users to log in again if there is a new random seed after each server restart.
-	state.cookieSecret = cookie.RandomCookieFriendlyString(30)
+	// For the secure cookies. The secret is generated with crypto/rand, so
+	// each process start gets its own unpredictable secret. Cookies signed
+	// with a previous secret stop validating after a restart.
+	cookieSecret, err := newCookieSecret()
+	if err != nil {
+		return nil, err
+	}
+	state.cookieSecret = cookieSecret
 
 	// Seed the random number generator for the cookie package
 	if randomseed {
